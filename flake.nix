@@ -39,7 +39,7 @@
 
       packages = lib.forAllPkgs nixpkgs { } (pkgs: lib.makeLayer so.default pkgs |> lib.collapseLayer);
 
-      formatter = lib.forAllPkgs self { } (pkgs: pkgs.kasumi-fmt);
+      formatter = lib.forAllPkgs self { } <| builtins.getAttr "kasumi-fmt";
       devShells = lib.forAllPkgs self { } (pkgs: {
         default = pkgs.callPackage ./shell.nix { };
       });

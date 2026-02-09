@@ -15,6 +15,8 @@ final: prev: {
 
   inherit (final.attrsets)
     singletonAttrs
+    pair
+    singletonPair
     bindAttrs
     mbindAttrs
     mergeMapAttrs

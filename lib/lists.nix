@@ -1,4 +1,4 @@
-_: prev:
+final: prev:
 let
   inherit (builtins)
     length
@@ -9,7 +9,8 @@ let
 
   inherit (prev.trivial) max min;
   inherit (prev.lists) take drop;
-  inherit (prev.attrsets) nameValuePair;
+
+  inherit (final.attrsets) pair;
 in
 {
   splitAt =
@@ -29,7 +30,7 @@ in
       [ ]
     else
       let
-        index = target |> map (e: nameValuePair (toString e) null) |> listToAttrs;
+        index = target |> map (e: pair (toString e) null) |> listToAttrs;
       in
       filter (e: index ? "${toString e}") base;
 
@@ -39,7 +40,7 @@ in
       minuend
     else
       let
-        index = subtrahend |> map (e: nameValuePair (toString e) null) |> listToAttrs;
+        index = subtrahend |> map (e: pair (toString e) null) |> listToAttrs;
       in
       filter (e: !index ? "${toString e}") minuend;
 

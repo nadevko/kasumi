@@ -1,13 +1,13 @@
 final: prev:
 let
   inherit (builtins) isAttrs;
-  inherit (prev.attrsets) nameValuePair isDerivation;
+  inherit (prev.attrsets) isDerivation;
   inherit (prev.trivial) id;
 
   inherit (final.meta) isSupportedDerivation;
   inherit (final.di) callWith callPackageBy;
   inherit (final.overlays) fuseLay foldLay;
-  inherit (final.attrsets) mbindAttrs bindAttrs;
+  inherit (final.attrsets) mbindAttrs bindAttrs singletonPair;
 in
 rec {
   makeLayer =
@@ -45,7 +45,7 @@ rec {
       makeRecurse =
         concat: n: v:
         if include v then
-          [ (nameValuePair (concat n) v) ]
+          singletonPair (concat n) v
         else if isAttrs v && v.recurseForDerivations or false then
           recurse (concat n) (v.extension or v)
         else

@@ -2,11 +2,11 @@ final: prev:
 let
   inherit (builtins) readDir pathExists mapAttrs;
 
-  inherit (prev.attrsets) nameValuePair;
   inherit (prev.trivial) const;
   inherit (prev) nixosSystem;
 
   inherit (final.attrsets)
+    singletonPair
     bindAttrs
     mbindAttrs
     mergeMapAttrs
@@ -77,10 +77,10 @@ rec {
       makeRecurse =
         toPrefix: toName: abs: n: type:
         let
-          entry = nameValuePair (toName n type) abs;
+          entry = singletonPair (toName n type) abs;
           subtree = recurse (toPrefix n type) abs;
         in
-        (if include n type then [ entry ] else [ ]) ++ (if recurseInto n type then subtree else [ ]);
+        (if include n type then entry else [ ]) ++ (if recurseInto n type then subtree else [ ]);
       recurse = prefix: bindDir <| makeRecurse (concatPrefix prefix) <| concatName prefix;
     in
     mbindDir <| makeRecurse toRootPrefix toRootName;
@@ -132,7 +132,7 @@ rec {
         abs = root + "/${n}";
         config = if dir ? ${n + ".nix"} then import <| abs + ".nix" else { };
       in
-      if isDir type -> isHidden n then [ ] else [ (nameValuePair n <| f abs n config) ]
+      if isDir type -> isHidden n then [ ] else singletonPair n <| f abs n config
     ) dir;
 
   readConfigurations =
@@ -179,9 +179,9 @@ rec {
         let
           default = abs + "/default.nix";
         in
-        if pathExists default then [ (nameValuePair n <| import default final prev) ] else [ ]
+        if pathExists default then singletonPair n <| import default final prev else [ ]
       else if n != "default.nix" && isNix n then
-        [ (nameValuePair (stemOfNix n) <| import abs final prev) ]
+        singletonPair (stemOfNix n) <| import abs final prev
       else
         [ ]
     ) root;
