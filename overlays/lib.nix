@@ -3,7 +3,7 @@ final: prev: {
   debug = import ../lib/debug.nix final prev;
   di = import ../lib/di.nix final prev;
   filesystem = import ../lib/filesystem.nix final prev;
-  layer = import ../lib/layer.nix final prev;
+  layers = import ../lib/layers.nix final prev;
   lists = import ../lib/lists.nix final prev;
   maintainers = import ../lib/maintainers.nix final prev;
   meta = import ../lib/meta.nix final prev;
@@ -14,7 +14,8 @@ final: prev: {
   trivial = import ../lib/trivial.nix final prev;
 
   inherit (final.attrsets)
-    singletonAttrs
+    attr
+    singletonAttr
     pair
     singletonPair
     bindAttrs
@@ -65,7 +66,7 @@ final: prev: {
     comfyByNameOverlayFrom
     ;
 
-  inherit (final.layer)
+  inherit (final.layers)
     makeLayer
     fuseLayerWith
     foldLayerWith

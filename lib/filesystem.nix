@@ -10,7 +10,7 @@ let
     bindAttrs
     mbindAttrs
     mergeMapAttrs
-    singletonAttrs
+    attr
     ;
   inherit (final.paths)
     stemOfNix
@@ -115,7 +115,7 @@ rec {
     depth:
     mergeMapDir (
       abs: n: type:
-      (if include n type then singletonAttrs n abs else { })
+      (if include n type then attr n abs else { })
       // (if 0 < depth && recurseInto n type then collapseShardsWith args (depth - 1) abs else { })
     );
 

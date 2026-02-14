@@ -10,7 +10,7 @@
     extra-trusted-public-keys = [ "kasumi.cachix.org-1:ymQ5ardABxeR1WrQX+NAvohAh2GL8aAv5W6osujKbG8=" ];
   };
 
-  inputs.nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+  inputs.nixpkgs.url = "https://channels.nixos.org/nixos-unstable/nixexprs.tar.xz";
 
   outputs =
     { self, nixpkgs, ... }:

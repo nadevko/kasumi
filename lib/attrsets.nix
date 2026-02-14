@@ -21,7 +21,8 @@ let
   inherit (final.trivial) compose snd;
 in
 rec {
-  singletonAttrs = n: v: { ${n} = v; };
+  attr = n: v: { ${n} = v; };
+  singletonAttr = n: v: singleton <| attr n v;
   pair = name: value: { inherit name value; };
   singletonPair = n: v: singleton <| pair n v;
 
