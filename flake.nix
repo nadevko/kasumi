@@ -21,8 +21,6 @@
     {
       inherit lib;
 
-      templates = lib.filesystem.readTemplates { default = "unstable"; } ./templates;
-
       overlays = {
         default = import ./overlay.nix;
         lib = import ./overlays/lib.nix;

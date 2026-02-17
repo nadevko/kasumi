@@ -1,16 +1,18 @@
 final: prev: {
   attrsets = import ../lib/attrsets.nix final prev;
   debug = import ../lib/debug.nix final prev;
+  derivations = import ../lib/derivations.nix final prev;
   di = import ../lib/di.nix final prev;
   filesystem = import ../lib/filesystem.nix final prev;
+  flakes = import ../lib/flakes.nix final prev;
   layers = import ../lib/layers.nix final prev;
+  lib = import ../lib/lib.nix final prev;
   lists = import ../lib/lists.nix final prev;
   maintainers = import ../lib/maintainers.nix final prev;
-  meta = import ../lib/meta.nix final prev;
   nixos = import ../lib/nixos.nix final prev;
+  numerics = import ../lib/numerics.nix final prev;
   overlays = import ../lib/overlays.nix final prev;
   paths = import ../lib/paths.nix final prev;
-  systems = import ../lib/systems.nix final prev;
   trivial = import ../lib/trivial.nix final prev;
 
   inherit (final.attrsets)
@@ -31,14 +33,28 @@ final: prev: {
     genTransposedAttrs
     foldPathWith
     foldPath
-    genLibAliasesPred
-    genLibAliasesWithout
-    genLibAliases
     ;
 
-  inherit (final.debug) attrPos' attrPos;
+  inherit (final.debug)
+    warnIf
+    throwIf
+    warnIfNot
+    throwIfNot
+    validateEnumList
+    info
+    withWarns
+    attrPos'
+    attrPos
+    ;
 
-  inherit (final.di) callWith callPackageBy callPackageWith;
+  inherit (final.di)
+    getAnnotation
+    setAnnotation
+    inheritAnnotationFrom
+    callWith
+    callPackageBy
+    callPackageWith
+    ;
 
   inherit (final.filesystem)
     readDirPaths
@@ -66,6 +82,17 @@ final: prev: {
     comfyByNameOverlayFrom
     ;
 
+  inherit (final.flakes)
+    flakeSystems
+    importFlakePkgs
+    forAllSystems
+    forSystems
+    forAllPkgs
+    forPkgs
+    importPkgsForAll
+    importPkgsFor
+    ;
+
   inherit (final.layers)
     makeLayer
     fuseLayerWith
@@ -79,6 +106,16 @@ final: prev: {
     collapseSupportedBy
     ;
 
+  inherit (final.lib)
+    genLibAliasesPred
+    genLibAliasesWithout
+    genLibAliases
+    forkLibAs
+    forkLib
+    augmentLibAs
+    augmentLib
+    ;
+
   inherit (final.lists)
     splitAt
     intersectStrings
@@ -86,7 +123,14 @@ final: prev: {
     dfold
     ;
 
-  inherit (final.meta) isSupportedDerivation;
+  inherit (final.derivations) isDerivation isSupportedDerivation;
+
+  inherit (final.numerics)
+    encodeIntWith
+    fromHex
+    toHex
+    toBaseDigits
+    ;
 
   inherit (final.overlays)
     makeLayMerge
@@ -118,10 +162,6 @@ final: prev: {
     nestOverlay
     nestOverlayr
     nestOverlayl
-    forkLibAs
-    forkLib
-    augmentLibAs
-    augmentLib
     ;
 
   inherit (final.paths)
@@ -135,27 +175,49 @@ final: prev: {
     isVisibleDir
     ;
 
-  inherit (final.systems)
-    flakeSystems
-    importFlakePkgs
-    forAllSystems
-    forSystems
-    forAllPkgs
-    forPkgs
-    importPkgsForAll
-    importPkgsFor
-    ;
-
   inherit (final.trivial)
+    id
+    const
     snd
     apply
+    fapply
+    concat
+    update
+    flip
+    compose
+    pipe
+    fpipe
     eq
     neq
-    compose
+    boolNot
+    boolOr
+    boolAnd
+    boolXor
+    boolImply
+    gt
+    le
+    ge
+    min
+    max
+    mod
+    bitNot
+    boolToWith
+    boolToTrue
+    boolToYes
+    ifElse
+    withDefault
+    applyNullable
     invoke
+    importJSON
+    importTOML
+    isAppliable
+    isFunctor
+    toFunction
+    toFunctor
     fix
     fix'
-    annotateArgs
-    mirrorArgsFrom
+    isNixShellImpure
+    isImpure
+    isPure
     ;
 }

@@ -3,8 +3,8 @@ let
   inherit (builtins) isFunction;
 
   inherit (prev.lists) foldr;
-  inherit (prev.trivial) flip mergeAttrs;
 
+  inherit (final.trivial) flip update;
   inherit (final.attrsets) pointwisel pointwiser;
   inherit (final.trivial) fix fix';
 in
@@ -35,10 +35,10 @@ rec {
   rebaseSelf = g: prev: fix (self: g self prev);
   rebaseSelf' = g: prev: fix' (self: g self prev);
 
-  lay = makeLayMerge mergeAttrs;
-  rebaseLay = makeLayRebase mergeAttrs;
-  rebaseLay' = makeLayRebase' mergeAttrs;
-  fuseLay = makeLayFuse mergeAttrs;
+  lay = makeLayMerge update;
+  rebaseLay = makeLayRebase update;
+  rebaseLay' = makeLayRebase' update;
+  fuseLay = makeLayFuse update;
   foldLay = makeLayFold fuseLay;
 
   layr = makeLayMerge pointwiser;
@@ -84,12 +84,7 @@ rec {
       ${n} = merge prevN <| g final.${n} prevN;
     };
 
-  nestOverlay = nestOverlayWith mergeAttrs;
+  nestOverlay = nestOverlayWith update;
   nestOverlayr = nestOverlayWith pointwiser;
   nestOverlayl = nestOverlayWith pointwisel;
-
-  forkLibAs = nestOverlayr "lib";
-  forkLib = forkLibAs "lib";
-  augmentLibAs = nestOverlayl "lib";
-  augmentLib = augmentLibAs "lib";
 }

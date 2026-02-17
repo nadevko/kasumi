@@ -10,15 +10,12 @@ let
     intersectAttrs
     head
     tail
-    elem
     ;
 
   inherit (prev.attrsets) genAttrs mapAttrsToList mergeAttrsList;
-  inherit (prev.strings) hasPrefix;
-  inherit (prev.trivial) id;
   inherit (prev.lists) singleton;
 
-  inherit (final.trivial) compose snd;
+  inherit (final.trivial) compose id snd;
 in
 rec {
   attr = n: v: { ${n} = v; };
@@ -82,30 +79,4 @@ rec {
     recurse default;
 
   foldPath = foldPathWith snd;
-
-  genLibAliasesPred =
-    exclude:
-    mbindAttrs (
-      n: v:
-      if isAttrs v -> exclude n v then
-        [ ]
-      else
-        bindAttrs (n: v: if isAttrs v || hasPrefix "_" n then [ ] else singletonPair n v) v
-    );
-
-  genLibAliasesWithout = blacklist: genLibAliasesPred (n: _: elem n blacklist || hasPrefix "_" n);
-
-  genLibAliases = genLibAliasesWithout [
-    "systems"
-    "licenses"
-    "fetchers"
-    "generators"
-    "cli"
-    "network"
-    "kernel"
-    "types"
-    "maintainers"
-    "features"
-    "teams"
-  ];
 }

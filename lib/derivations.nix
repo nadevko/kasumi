@@ -1,10 +1,10 @@
 final: prev:
 let
   inherit (builtins) elem;
-
-  inherit (prev.attrsets) isDerivation;
 in
-{
+rec {
+  isDerivation = v: v.type or null == "derivation";
+
   isSupportedDerivation =
     system: v:
     isDerivation v

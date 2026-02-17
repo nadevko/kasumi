@@ -7,9 +7,9 @@ let
     elemAt
     ;
 
-  inherit (prev.trivial) max min;
   inherit (prev.lists) take drop;
 
+  inherit (final.trivial) max min;
   inherit (final.attrsets) pair;
 in
 {

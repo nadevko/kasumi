@@ -2,11 +2,11 @@ final: prev:
 let
   inherit (builtins) isFunction;
 
-  inherit (final.attrsets) genAttrsBy;
-
   inherit (prev.systems) flakeExposed;
   inherit (prev.attrsets) genAttrs;
-  inherit (prev.trivial) id;
+
+  inherit (final.attrsets) genAttrsBy;
+  inherit (final.trivial) id;
 in
 rec {
   flakeSystems = flakeExposed;

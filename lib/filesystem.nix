@@ -2,9 +2,9 @@ final: prev:
 let
   inherit (builtins) readDir pathExists mapAttrs;
 
-  inherit (prev.trivial) const;
   inherit (prev) nixosSystem;
 
+  inherit (final.trivial) const;
   inherit (final.attrsets)
     singletonPair
     bindAttrs
