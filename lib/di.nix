@@ -22,8 +22,15 @@ let
 
   inherit (final.trivial) invoke compose;
   inherit (final.debug) attrPos;
+
+  inherit (final.di)
+    setAnnotation
+    getAnnotation
+    callPackageBy
+    callWith
+    ;
 in
-rec {
+{
   getAnnotation =
     f: if f ? __functor then f.__functionArgs or (functionArgs <| f.__functor f) else functionArgs f;
 

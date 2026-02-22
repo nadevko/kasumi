@@ -1,8 +1,10 @@
-final: prev:
+final: _:
 let
   inherit (builtins) elem;
+
+  inherit (final.derivations) isDerivation;
 in
-rec {
+{
   isDerivation = v: v.type or null == "derivation";
 
   isSupportedDerivation =

@@ -3,13 +3,19 @@ let
   inherit (builtins) isAttrs;
 
   inherit (final.trivial) id;
-  inherit (final.meta) isSupportedDerivation;
   inherit (final.di) callWith callPackageBy;
   inherit (final.overlays) fuseLay foldLay;
   inherit (final.attrsets) mbindAttrs bindAttrs singletonPair;
-  inherit (final.derivations) isDerivation;
+  inherit (final.derivations) isDerivation isSupportedDerivation;
+
+  inherit (final.layers)
+    makeLayer
+    collapseLayerWith
+    collapseLayerSep
+    collapseSupportedSep
+    ;
 in
-rec {
+{
   makeLayer =
     overlay: prev:
     let

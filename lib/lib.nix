@@ -6,8 +6,15 @@ let
 
   inherit (final.attrsets) mbindAttrs bindAttrs singletonPair;
   inherit (final.overlays) nestOverlayl nestOverlayr;
+
+  inherit (final.lib)
+    genLibAliasesPred
+    genLibAliasesWithout
+    forkLibAs
+    augmentLibAs
+    ;
 in
-rec {
+{
   genLibAliasesPred =
     pred:
     mbindAttrs (

@@ -5,8 +5,15 @@ let
   inherit (prev.strings) hasPrefix hasSuffix removeSuffix;
 
   inherit (final.trivial) eq;
+
+  inherit (final.paths)
+    isDir
+    isNix
+    isHidden
+    isVisible
+    ;
 in
-rec {
+{
   stemOf =
     n:
     let

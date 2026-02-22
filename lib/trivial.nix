@@ -1,4 +1,4 @@
-_: _:
+final: _:
 let
   inherit (builtins)
     foldl'
@@ -9,8 +9,18 @@ let
     fromJSON
     getEnv
     ;
+
+  inherit (final.trivial)
+    fapply
+    flip
+    compose
+    pipe
+    boolAs
+    isFunctor
+    isImpure
+    ;
 in
-rec {
+{
   id = x: x;
   const = x: _: x;
   snd = _: y: y;
@@ -48,11 +58,11 @@ rec {
 
   bitNot = sub (-1);
 
-  boolToWith =
+  boolAs =
     yes: no: bool:
     if bool then yes else no;
-  boolToTrue = boolToWith "true" "false";
-  boolToYes = boolToWith "yes" "no";
+  boolAsTrue = boolAs "true" "false";
+  boolAsYes = boolAs "yes" "no";
 
   ifElse =
     bool: yes: no:

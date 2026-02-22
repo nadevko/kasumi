@@ -11,8 +11,15 @@ let
   inherit (prev.lists) foldr;
 
   inherit (final.trivial) flip;
+
+  inherit (final.debug)
+    warnIf
+    throwIf
+    throwIfNot
+    attrPos'
+    ;
 in
-rec {
+{
   warnIf =
     cond: msg: x:
     if cond then warn msg x else x;

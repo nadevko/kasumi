@@ -16,8 +16,19 @@ let
   inherit (prev.lists) singleton;
 
   inherit (final.trivial) compose id snd;
+
+  inherit (final.attrsets)
+    attr
+    pair
+    bindAttrs
+    singletonPair
+    transposeAttrs
+    genAttrsBy
+    genTransposedAttrsBy
+    foldPathWith
+    ;
 in
-rec {
+{
   attr = n: v: { ${n} = v; };
   singletonAttr = n: v: singleton <| attr n v;
   pair = name: value: { inherit name value; };

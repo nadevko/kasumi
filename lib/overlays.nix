@@ -7,8 +7,21 @@ let
   inherit (final.trivial) flip update;
   inherit (final.attrsets) pointwisel pointwiser;
   inherit (final.trivial) fix fix';
+
+  inherit (final.overlays)
+    makeLayMerge
+    makeLayRebaseWith
+    makeLayRebase
+    makeLayRebase'
+    makeLayFuse
+    makeLayFold
+    fuseLay
+    fuseLayr
+    fuseLayl
+    nestOverlayWith
+    ;
 in
-rec {
+{
   makeLayMerge =
     merge: g: rattrs: final:
     let

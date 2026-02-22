@@ -22,8 +22,23 @@ let
     isDir
     ;
   inherit (final.di) callPackageWith callPackageBy callWith;
+
+  inherit (final.filesystem)
+    makeReadDirWrapper
+    bindDir
+    mbindDir
+    mergeMapDir
+    collectFiles
+    collectNixFiles
+    collapseDir
+    collapseNixDirSep
+    collapseShardsWith
+    readDirWithManifest
+    readConfigurations
+    byNameOverlayWithName
+    ;
 in
-rec {
+{
   readDirPaths = root: mapAttrs (n: _: root + "/${n}") <| readDir root;
 
   makeReadDirWrapper =

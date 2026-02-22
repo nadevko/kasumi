@@ -7,8 +7,15 @@ let
 
   inherit (final.attrsets) genAttrsBy;
   inherit (final.trivial) id;
+
+  inherit (final.flakes)
+    flakeSystems
+    importFlakePkgs
+    forPkgs
+    importPkgsFor
+    ;
 in
-rec {
+{
   flakeSystems = flakeExposed;
 
   importFlakePkgs =

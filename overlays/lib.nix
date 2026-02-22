@@ -201,9 +201,9 @@ final: prev: {
     max
     mod
     bitNot
-    boolToWith
-    boolToTrue
-    boolToYes
+    boolAs
+    boolAsTrue
+    boolAsYes
     ifElse
     withDefault
     applyNullable

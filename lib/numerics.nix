@@ -1,11 +1,13 @@
-_: prev:
+final: prev:
 let
   inherit (builtins) elemAt match isInt;
 
   inherit (prev.lists) reverseList;
   inherit (prev.strings) concatMapStrings;
+
+  inherit (final.numerics) encodeIntWith toBaseDigits;
 in
-rec {
+{
   encodeIntWith =
     base: alphabet: i:
     concatMapStrings (elemAt alphabet) <| toBaseDigits base i;
