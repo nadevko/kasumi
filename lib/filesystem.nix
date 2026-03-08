@@ -5,7 +5,7 @@ let
   inherit (prev) nixosSystem;
 
   inherit (final.trivial) const;
-  inherit (final.attrsets)
+  inherit (final.attrs)
     singletonPair
     bindAttrs
     mbindAttrs

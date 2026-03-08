@@ -1,13 +1,40 @@
 final: prev:
 let
-  inherit (builtins) elemAt match isInt;
+  inherit (builtins)
+    elemAt
+    match
+    isInt
+    lessThan
+    sub
+    ;
 
   inherit (prev.lists) reverseList;
   inherit (prev.strings) concatMapStrings;
 
-  inherit (final.numerics) encodeIntWith toBaseDigits;
+  inherit (final.trivial) flip;
+
+  inherit (final.numeric)
+    encodeIntWith
+    toBaseDigits
+    max
+    min
+    ;
 in
 {
+  gt = flip lessThan;
+  le = a: b: !lessThan b a;
+  ge = a: b: !lessThan a b;
+
+  min = a: b: if a < b then a else b;
+  max = a: b: if a > b then a else b;
+  mod = base: int: base - (int * (base / int));
+
+  bitNot = sub (-1);
+
+  clamp =
+    minX: maxX: x:
+    max minX <| min x maxX x;
+
   encodeIntWith =
     base: alphabet: i:
     concatMapStrings (elemAt alphabet) <| toBaseDigits base i;

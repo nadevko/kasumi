@@ -4,7 +4,7 @@ let
 
   inherit (prev.strings) hasPrefix;
 
-  inherit (final.attrsets) mbindAttrs bindAttrs singletonPair;
+  inherit (final.attrs) mbindAttrs bindAttrs singletonPair;
   inherit (final.overlays) nestOverlayl nestOverlayr;
 
   inherit (final.lib)

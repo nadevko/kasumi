@@ -1,5 +1,5 @@
 final: prev: {
-  attrsets = import ../lib/attrsets.nix final prev;
+  attrs = import ../lib/attrs.nix final prev;
   debug = import ../lib/debug.nix final prev;
   derivations = import ../lib/derivations.nix final prev;
   di = import ../lib/di.nix final prev;
@@ -10,12 +10,12 @@ final: prev: {
   lists = import ../lib/lists.nix final prev;
   maintainers = import ../lib/maintainers.nix final prev;
   nixos = import ../lib/nixos.nix final prev;
-  numerics = import ../lib/numerics.nix final prev;
+  numeric = import ../lib/numeric.nix final prev;
   overlays = import ../lib/overlays.nix final prev;
   paths = import ../lib/paths.nix final prev;
   trivial = import ../lib/trivial.nix final prev;
 
-  inherit (final.attrsets)
+  inherit (final.attrs)
     attr
     singletonAttr
     pair
@@ -84,7 +84,7 @@ final: prev: {
 
   inherit (final.flakes)
     flakeSystems
-    importFlakePkgs
+    getPkgs
     forAllSystems
     forSystems
     forAllPkgs
@@ -125,7 +125,7 @@ final: prev: {
 
   inherit (final.derivations) isDerivation isSupportedDerivation;
 
-  inherit (final.numerics)
+  inherit (final.numeric)
     encodeIntWith
     fromHex
     toHex

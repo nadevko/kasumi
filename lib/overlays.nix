@@ -5,7 +5,7 @@ let
   inherit (prev.lists) foldr;
 
   inherit (final.trivial) flip update;
-  inherit (final.attrsets) pointwisel pointwiser;
+  inherit (final.attrs) pointwisel pointwiser;
   inherit (final.trivial) fix fix';
 
   inherit (final.overlays)

@@ -5,7 +5,7 @@ let
   inherit (prev.systems) flakeExposed;
   inherit (prev.attrsets) genAttrs;
 
-  inherit (final.attrsets) genAttrsBy;
+  inherit (final.attrs) genAttrsBy;
   inherit (final.trivial) id;
 
   inherit (final.flakes)

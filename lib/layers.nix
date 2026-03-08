@@ -5,7 +5,7 @@ let
   inherit (final.trivial) id;
   inherit (final.di) callWith callPackageBy;
   inherit (final.overlays) fuseLay foldLay;
-  inherit (final.attrsets) mbindAttrs bindAttrs singletonPair;
+  inherit (final.attrs) mbindAttrs bindAttrs singletonPair;
   inherit (final.derivations) isDerivation isSupportedDerivation;
 
   inherit (final.layers)

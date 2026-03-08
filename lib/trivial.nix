@@ -2,9 +2,7 @@ final: _:
 let
   inherit (builtins)
     foldl'
-    sub
     isFunction
-    lessThan
     readFile
     fromJSON
     getEnv
@@ -47,16 +45,6 @@ in
   boolAnd = a: b: a && b;
   boolXor = a: b: (!a) != (!b);
   boolImply = a: b: a -> b;
-
-  gt = flip lessThan;
-  le = a: b: !lessThan b a;
-  ge = a: b: !lessThan a b;
-
-  min = a: b: if a < b then a else b;
-  max = a: b: if a > b then a else b;
-  mod = base: int: base - (int * (base / int));
-
-  bitNot = sub (-1);
 
   boolAs =
     yes: no: bool:

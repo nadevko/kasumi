@@ -17,7 +17,7 @@ let
 
   inherit (final.trivial) compose id snd;
 
-  inherit (final.attrsets)
+  inherit (final.attrs)
     attr
     pair
     bindAttrs

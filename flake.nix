@@ -23,7 +23,12 @@
 
       overlays = {
         default = import ./overlay.nix;
+
         lib = import ./overlays/lib.nix;
+        builtins = import ./overlays/builtins.nix;
+        polyfills = import ./overlays/polyfills.nix;
+        shadow = import ./overlays/shadow.nix;
+
         augment = lib.augmentLib so.lib;
         compat = import ./overlays/compat.nix;
       };
