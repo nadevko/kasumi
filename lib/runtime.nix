@@ -5,7 +5,7 @@ let
 in
 prev.runtime or {} // {
   # --- purity state ----------------------------------------------------------
-  inNixShellImpure = getEnv "IN_NIX_SHELL" != "";
+  inNixShell = getEnv "IN_NIX_SHELL" != "";
   inImpure = builtins ? currentSystem;
   inPure = !inImpure;
 
