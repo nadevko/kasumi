@@ -1,10 +1,15 @@
-final: _:
+final: prev:
 let
-  inherit (builtins) elem;
+  inherit (final.lists) elem slice;
 
   inherit (final.derivations) isDerivation;
 in
-{
+prev.derivations or { }
+// {
+  # --- context manipulations -------------------------------------------------
+  cloneContext = src: target: slice 0 0 src + target;
+
+  # --- checks ----------------------------------------------------------------
   isDerivation = v: v.type or null == "derivation";
 
   isSupportedDerivation =

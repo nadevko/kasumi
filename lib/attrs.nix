@@ -25,10 +25,13 @@ let
     genAttrsBy
     genTransposedAttrsBy
     foldPathWith
-    genAttrs mapAttrsToList mergeAttrsList
+    genAttrs
+    mapAttrsToList
+    mergeAttrsList
     ;
 in
-{
+prev.attrs or { }
+// {
   attr = n: v: { ${n} = v; };
   singletonAttr = n: v: singleton <| attr n v;
   pair = name: value: { inherit name value; };

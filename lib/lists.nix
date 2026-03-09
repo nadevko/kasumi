@@ -4,7 +4,6 @@ let
   inherit (final.types) isList;
   inherit (final.numeric) max clamp;
   inherit (final.attrs) pair fromPairs;
-  inherit (final.debug) throwIf;
 
   inherit (final.lists)
     take
@@ -20,7 +19,8 @@ let
     singleton
     ;
 in
-{
+prev.lists or { }
+// {
   # --- trivial ---------------------------------------------------------------
   singleton = x: [ x ];
   toList = x: if isList x then x else [ x ];
@@ -35,12 +35,12 @@ in
 
   last =
     xs:
-    assert throwIf (xs == [ ]) "kasumi.lib.lists.last: list must not be empty!";
+    assert xs != [ ] || "kasumi.lists.last: list must not be empty!";
     at xs (size xs - 1);
 
   init =
     xs:
-    assert throwIf (xs == [ ]) "kasumi.lib.lists.init: list must not be empty!";
+    assert xs != [ ] || "kasumi.lists.init: list must not be empty!";
     take (size xs - 1) xs;
 
   sublist =

@@ -29,7 +29,7 @@ let
   };
   deprecated = { inherit (builtins) toPath; };
   derivations = {
-    inherit (builtins) getContext hasContext parseDrvName;
+    inherit (builtins) getContext hasContext;
     inherit derivation placeholder;
     dependOn = builtins.appendContext;
     derivation' = derivationStrict;
@@ -70,8 +70,8 @@ let
     in
     {
       fetchFlake = getFlake;
-      parseRef = parseFlakeRef;
-      showRef = flakeRefToString;
+      fromRef = parseFlakeRef;
+      toRef = flakeRefToString;
     };
   lists = {
     inherit map;
@@ -106,6 +106,10 @@ let
       sub
       ;
     lt = builtins.lessThan;
+  };
+  meta = {
+    inherit (builtins) compareVersions splitVersion;
+    splitDrvName = builtins.parseDrvName;
   };
   paths = {
     basename = baseNameOf;
@@ -155,7 +159,6 @@ let
       ;
     isStr = builtins.isString;
   };
-  versions = { inherit (builtins) compareVersions splitVersion; };
 
   __deprecationWarn =
     n:
@@ -176,12 +179,12 @@ in
     filesystem
     flakes
     lists
+    meta
     numeric
     paths
     runtime
     strings
     types
-    versions
     ;
   inherit __deprecationWarn;
 }
@@ -193,9 +196,9 @@ in
 // filesystem
 // flakes
 // lists
+// meta
 // numeric
 // paths
 // runtime
 // strings
 // types
-// versions

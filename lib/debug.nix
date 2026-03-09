@@ -11,35 +11,23 @@ let
   inherit (final.lists) foldr;
   inherit (final.trivial) flip;
 
-  inherit (final.debug)
-    warnIf
-    throwIf
-    throwIfNot
-    attrPos'
-    ;
+  inherit (final.debug) attrPos';
 in
 {
-  warnIf =
-    cond: msg: x:
-    if cond then warn msg x else x;
-  throwIf =
-    cond: msg: x:
-    if cond then throw msg x else x;
-  warnIfNot = cond: warnIf (!cond);
-  throwIfNot = cond: throwIf (!cond);
-
   validateEnumList =
     msg: valid: given:
     let
       unexpected = subtractLists valid given;
     in
-    throwIfNot (unexpected == [ ])
-    <|
-      msg
-      + ": "
-      + (concatStringsSep ", " <| map toString unexpected)
-      + " unexpected; valid ones: "
-      + (concatStringsSep ", " <| map toString valid);
+    assert
+      unexpected == [ ]
+      ||
+        msg
+        + ": "
+        + (concatStringsSep ", " <| map toString unexpected)
+        + " unexpected; valid ones: "
+        + (concatStringsSep ", " <| map toString valid);
+    given;
 
   info = msg: trace "INFO: ${msg}";
   withWarns = flip <| foldr warn;

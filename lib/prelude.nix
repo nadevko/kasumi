@@ -4,7 +4,8 @@ let
 
   inherit (final.prelude) fapply flip pipe;
 in
-prev.prelude or {} // {
+prev.prelude or { }
+// {
   # --- realisation -----------------------------------------------------------
   id = x: x;
   const = x: _: x;

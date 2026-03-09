@@ -1,6 +1,6 @@
 final: prev:
 let
-  inherit (final.prelude) boolAs neq;
+  inherit (final.prelude) boolAs neq flip;
   inherit (final.lists)
     imap1
     filter
@@ -12,11 +12,13 @@ let
     size
     generate
     elem
+    imap0
+    head
+    tail
     ;
-  inherit (final.attrs) mapValues;
-  inherit (final.types) isPath;
+  inherit (final.attrs) mapValues pair fromPairs;
+  inherit (final.types) isPath isStr typeOf;
   inherit (final.numeric) min max;
-  inherit (final.debug) throwIf;
   inherit (final.strings)
     join
     joinSep
@@ -24,6 +26,7 @@ let
     joinMapSep
     joinMap
     joinAttrsSep
+    isStrConvertible
     joinWhereSep
     joinOptionalsSep
     replaceAll
@@ -34,9 +37,26 @@ let
     levenshtein
     commonSegmentLength
     chars
-    ascii-to-num
-    num-to-ascii
+    asciiSet
+    ascii
+    subChar
+    subchars
     charAt
+    isList
+    all
+    isPrintableAscii
+    asciiUpper
+    asciiLower
+    toLower
+    toUpper
+    toStr
+    escapeRegex
+    split
+    splitOnAny
+    toSentenceCase
+    optionalStr
+    match
+    isStrLike
     ;
 in
 prev.strings or { }
@@ -65,46 +85,136 @@ prev.strings or { }
 
   joinAttrs = joinAttrsSep "";
   joinAttrsSep =
-    sep: f: attrs:
-    joinSep sep <| mapValues f attrs;
+    sep: f: set:
+    joinSep sep <| mapValues f set;
 
-  # --- operations on characters ----------------------------------------------
+  # --- splits ----------------------------------------------------------------
+  splitOnSep = sep: x: toStr x |> split (escapeRegex <| toStr sep) |> filter isStr;
+  splitOnAny = seps: split "(${joinMapSep "|" escapeRegex seps})";
+
+  # --- char operations -------------------------------------------------------
+  subChar = "";
   charAt = x: i: slice i 1 x;
   chars = x: generate (charAt x) <| length x;
+  subchars = x: chars x |> map (x: if x == subChar then null else x);
   charsMap = f: x: chars x |> joinMap f;
 
-  ascii-to-num = import ./ascii-to-num.nix;
-  num-to-ascii = import ./num-to-ascii.nix;
-  rfc3986-unreserved = import ./rfc3986-unreserved.nix;
+  # --- ascii -----------------------------------------------------------------
+  ascii = subchars "\t\n\r !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+  asciiLower = chars "abcdefghijklmnopqrstuvwxyz";
+  asciiUpper = chars "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  asciiSet = imap0 (flip pair) ascii |> filter (x: x.name != null) |> fromPairs;
 
-  decodeAscii = x: if ascii-to-num ? ${x} then ascii-to-num.${x} else null;
-  encodeAscii = i: if 8 < i && i < 14 || 31 < i && i < 127 then at num-to-ascii i else null;
+  isPrintableAscii = i: 8 < i && i < 14 || 31 < i && i < 127;
+  fromAscii = x: if asciiSet ? ${x} then asciiSet.${x} else null;
+  toAscii = i: if isPrintableAscii i then at ascii i else null;
+
+  toLower = replaceAll asciiUpper asciiLower;
+  toUpper = replaceAll asciiLower asciiUpper;
+
+  toSentenceCase =
+    x:
+    assert
+      isStr x || throw "kasumi.strings.toSentenceCase: only strings are supported, but got ${typeOf x}.";
+    toUpper (charAt x 0) + toLower (slice 1 (length x - 1) x);
+
+  toCamelCase =
+    x:
+    assert
+      isStr x || throw "kasumi.strings.toCamelCase: only strings are supported, but got ${typeOf x}.";
+    let
+      seps = [
+        " "
+        "-"
+        "_"
+      ];
+      parts = toStr x |> splitOnAny seps |> filter (neq "");
+      first = toLower <| head parts;
+      rest = map toSentenceCase <| tail parts;
+    in
+    if parts == [ ] then "" else join <| [ first ] ++ rest;
+
+  # --- rfc3986 ---------------------------------------------------------------
+  unreserved = chars "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.~";
 
   # --- generators ------------------------------------------------------------
   repeat = n: x: join <| replicate n x;
+  replace = from: to: replaceAll [ from ] [ to ];
 
-  # --- checks ----------------------------------------------------------------
-  hasPrefix =
+  removePrefix =
     seg: str:
-    throwIf (isPath seg) "kasumi.strings.hasPrefix: only strings are supported."
-    <| slice 0 (length seg) str == seg;
-
-  hasSuffix =
-    seg: str:
+    assert !isPath seg || throw "kasumi.strings.removePrefix: path as first argument aren't supported.";
     let
-      len = length str;
+      len = length seg;
+    in
+    if slice 0 len str == seg then slice len (-1) str else str;
+
+  removeSuffix =
+    seg: str:
+    assert !isPath seg || throw "kasumi.strings.removeSuffix: path as first argument aren't supported.";
+    let
+      len = length seg;
       segLen = length seg;
     in
-    throwIf (isPath seg) "kasumi.strings.hasSuffix: only strings are supported."
-    <| len >= segLen && slice (len - segLen) segLen str == seg;
+    if segLen <= len && seg == slice (len - segLen) segLen str then slice 0 (len - segLen) str else str;
 
-  # --- mutations -------------------------------------------------------------
-  replace = from: to: replaceAll [ from ] [ to ];
+  trim =
+    x:
+    let
+      str = match "[[:space:]]*(.*[^[:space:]])[[:space:]]*" x;
+    in
+    optionalStr (str != null) (head str);
+
+  trimL =
+    x:
+    let
+      str = match "[[:space:]]*(.*)" x;
+    in
+    optionalStr (str != null) (head str);
+
+  trimR =
+    x:
+    let
+      str = match "(.*[^[:space:]])[[:space:]]*" x;
+    in
+    optionalStr (str != null) (head str);
+
+  # --- checks ----------------------------------------------------------------
+  isStrLike = x: isStr x || isPath x || x ? outPath || x ? __toString;
+  isStrConvertible =
+    x:
+    isStrLike x
+    || elem (typeOf x) [
+      "null"
+      "int"
+      "float"
+      "bool"
+    ]
+    || (isList x && all isStrConvertible x);
+
+  hasPrefix =
+    seg: x:
+    assert !isPath seg || throw "kasumi.strings.hasPrefix: path as first argument aren't supported.";
+    slice 0 (length seg) x == seg;
+
+  hasInfix =
+    seg: x:
+    assert !isPath x || throw "kasumi.strings.hasInfix: path as first argument aren't supported.";
+    match ".*${escapeRegex seg}.*" "${x}" != null;
+
+  hasSuffix =
+    seg: x:
+    assert !isPath seg || throw "kasumi.strings.hasSuffix: path as first argument aren't supported.";
+    let
+      len = length x;
+      segLen = length seg;
+    in
+    len >= segLen && slice (len - segLen) segLen x == seg;
 
   # --- escapes ---------------------------------------------------------------
 
   # --- serialisation (bools) -------------------------------------------------
-  optionalStr = str: boolAs str "";
+  optionalStr = cond: str: if cond then str else "";
 
   boolAsTrue = boolAs "true" "false";
   boolAsYes = boolAs "yes" "no";
@@ -120,9 +230,8 @@ prev.strings or { }
     in
     recurse 0;
 
-  commonPrefixLength = commonSegmentLength (i: str: slice i 1 str);
-
-  commonSuffixLength = a: b: commonSegmentLength (i: str: slice (length str - i - 1) 1 str) a b;
+  commonPrefixLength = commonSegmentLength (i: slice i 1);
+  commonSuffixLength = commonSegmentLength (i: str: slice (length str - i - 1) 1 str);
 
   levenshtein =
     strA: strB:
