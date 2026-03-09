@@ -2,9 +2,8 @@ final: prev:
 let
   inherit (builtins) isFunction;
 
-  inherit (prev.systems) flakeExposed;
-  inherit (prev.attrsets) genAttrs;
-
+  inherit (final.systems) flakeExposed;
+  inherit (final.attrsets) genAttrs;
   inherit (final.attrs) genAttrsBy;
   inherit (final.trivial) id;
 

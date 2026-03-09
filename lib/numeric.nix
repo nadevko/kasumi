@@ -8,9 +8,8 @@ let
     sub
     ;
 
-  inherit (prev.lists) reverseList;
-  inherit (prev.strings) concatMapStrings;
-
+  inherit (final.lists) reverseList;
+  inherit (final.strings) concatMapStrings;
   inherit (final.trivial) flip;
 
   inherit (final.numeric)

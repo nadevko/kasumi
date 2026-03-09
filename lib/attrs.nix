@@ -12,9 +12,7 @@ let
     tail
     ;
 
-  inherit (prev.attrsets) genAttrs mapAttrsToList mergeAttrsList;
-  inherit (prev.lists) singleton;
-
+  inherit (final.lists) singleton;
   inherit (final.trivial) compose id snd;
 
   inherit (final.attrs)
@@ -26,6 +24,7 @@ let
     genAttrsBy
     genTransposedAttrsBy
     foldPathWith
+    genAttrs mapAttrsToList mergeAttrsList
     ;
 in
 {

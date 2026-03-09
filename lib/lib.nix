@@ -2,8 +2,7 @@ final: prev:
 let
   inherit (builtins) isAttrs elem;
 
-  inherit (prev.strings) hasPrefix;
-
+  inherit (final.strings) hasPrefix;
   inherit (final.attrs) mbindAttrs bindAttrs singletonPair;
   inherit (final.overlays) nestOverlayl nestOverlayr;
 

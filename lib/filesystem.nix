@@ -22,8 +22,11 @@ let
     isDir
     ;
   inherit (final.di) callPackageWith callPackageBy callWith;
+  inherit (final.prelude) compose;
+  inherit (final.strings) fromJson fromToml;
 
   inherit (final.filesystem)
+    readFile
     makeReadDirWrapper
     bindDir
     mbindDir
@@ -39,6 +42,10 @@ let
     ;
 in
 {
+
+  importJSON = compose fromJson readFile;
+  importTOML = compose fromToml readFile;
+
   readDirPaths = root: mapAttrs (n: _: root + "/${n}") <| readDir root;
 
   makeReadDirWrapper =

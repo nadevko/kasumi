@@ -10,15 +10,15 @@ let
     concatStringsSep
     concatMap
     ;
-  inherit (prev.lists)
+  inherit (final.lists)
     take
     sortOn
     init
     last
     findFirst
     ;
-  inherit (prev.strings) levenshteinAtMost levenshtein;
-  inherit (prev.customisation) makeOverridable;
+  inherit (final.strings) levenshteinAtMost levenshtein;
+  inherit (final.customisation) makeOverridable;
 
   inherit (final.trivial) invoke compose;
   inherit (final.debug) attrPos;

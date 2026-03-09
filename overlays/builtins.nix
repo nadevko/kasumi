@@ -157,7 +157,7 @@ let
   };
   versions = { inherit (builtins) compareVersions splitVersion; };
 
-  deprecationWarn =
+  __deprecationWarn =
     n:
     builtins.warn ''
       `kasumi.lib.${n}` has been moved to `kasumi.lib.deprecated.${n}`.
@@ -183,10 +183,11 @@ in
     types
     versions
     ;
+  inherit __deprecationWarn;
 }
 // attrs
 // debug
-// builtins.mapAttrs deprecationWarn deprecated
+// builtins.mapAttrs __deprecationWarn deprecated
 // derivations
 // fetchers
 // filesystem

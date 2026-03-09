@@ -2,7 +2,7 @@ final: prev:
 let
   inherit (builtins) match head;
 
-  inherit (prev.strings) hasPrefix hasSuffix removeSuffix;
+  inherit (final.strings) hasPrefix hasSuffix removeSuffix;
 
   inherit (final.trivial) eq;
 

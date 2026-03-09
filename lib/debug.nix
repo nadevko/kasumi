@@ -8,8 +8,7 @@ let
     trace
     ;
 
-  inherit (prev.lists) foldr;
-
+  inherit (final.lists) foldr;
   inherit (final.trivial) flip;
 
   inherit (final.debug)

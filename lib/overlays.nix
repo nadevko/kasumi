@@ -2,8 +2,7 @@ final: prev:
 let
   inherit (builtins) isFunction;
 
-  inherit (prev.lists) foldr;
-
+  inherit (final.lists) foldr;
   inherit (final.trivial) flip update;
   inherit (final.attrs) pointwisel pointwiser;
   inherit (final.trivial) fix fix';

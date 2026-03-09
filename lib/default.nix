@@ -1,4 +1,7 @@
 {
-  lib ? import <nixpkgs/lib>,
+  lib ? import ../overlays/builtins.nix { } { },
 }:
-lib.fix (self: import ../overlays/lib.nix self lib)
+let
+  self = import ../overlays/lib.nix self lib;
+in
+self

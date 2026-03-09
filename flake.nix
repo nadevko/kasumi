@@ -10,12 +10,10 @@
     extra-trusted-public-keys = [ "kasumi.cachix.org-1:ymQ5ardABxeR1WrQX+NAvohAh2GL8aAv5W6osujKbG8=" ];
   };
 
-  inputs.nixpkgs.url = "https://channels.nixos.org/nixos-unstable/nixexprs.tar.xz";
-
   outputs =
-    { self, nixpkgs, ... }:
+    { self, ... }:
     let
-      lib = import ./lib { inherit (nixpkgs) lib; };
+      lib = import ./lib { lib = so.builtins {} {}; };
       so = self.overlays;
     in
     {
@@ -32,15 +30,6 @@
         augment = lib.augmentLib so.lib;
         compat = import ./overlays/compat.nix;
       };
-
-      legacyPackages = lib.importPkgsForAll nixpkgs {
-        overlays = [
-          so.compat
-          so.default
-        ];
-      };
-
-      packages = lib.forAllPkgs nixpkgs { } (pkgs: lib.makeLayer so.default pkgs |> lib.collapseLayer);
 
       formatter = lib.forAllPkgs self { } <| builtins.getAttr "kasumi-fmt";
       devShells = lib.forAllPkgs self { } (pkgs: {
