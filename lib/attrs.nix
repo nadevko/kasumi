@@ -10,6 +10,7 @@ let
     intersectAttrs
     head
     tail
+    attrValues
     ;
 
   inherit (final.lists) singleton;
@@ -32,6 +33,8 @@ in
   singletonAttr = n: v: singleton <| attr n v;
   pair = name: value: { inherit name value; };
   singletonPair = n: v: singleton <| pair n v;
+  mapValues = f: set: attrValues <| mapAttrs f set;
+  mapNames = f: set: attrNames <| mapAttrs f set;
 
   bindAttrs = f: set: concatMap (n: f n set.${n}) <| attrNames set;
   mbindAttrs = f: set: listToAttrs <| bindAttrs f set;

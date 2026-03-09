@@ -1,44 +1,52 @@
 final: prev:
 let
-  inherit (builtins)
-    elemAt
-    match
-    isInt
-    lessThan
-    sub
+  inherit (final.types) isInt;
+  inherit (final.lists)
+    reverse
+    fold'
+    head
+    tail
+    at
+    lt
     ;
-
-  inherit (final.lists) reverseList;
-  inherit (final.strings) concatMapStrings;
-  inherit (final.trivial) flip;
+  inherit (final.strings) joinMap match;
+  inherit (final.prelude) flip;
 
   inherit (final.numeric)
     encodeIntWith
     toBaseDigits
     max
     min
+    sub
     ;
 in
 {
-  gt = flip lessThan;
-  le = a: b: !lessThan b a;
-  ge = a: b: !lessThan a b;
-
-  min = a: b: if a < b then a else b;
-  max = a: b: if a > b then a else b;
+  # --- operations ------------------------------------------------------------
   mod = base: int: base - (int * (base / int));
 
-  bitNot = sub (-1);
+  # --- comparators -----------------------------------------------------------
+  gt = flip lt;
+  le = a: b: !lt b a;
+  ge = a: b: !lt a b;
+
+  # --- extremes --------------------------------------------------------------
+  min = a: b: if a < b then a else b;
+  max = a: b: if a > b then a else b;
+
+  minimum = xs: fold' min (head xs) <| tail xs;
+  maximum = xs: fold' max (head xs) <| tail xs;
 
   clamp =
     minX: maxX: x:
     max minX <| min x maxX x;
 
+  bitNot = sub (-1);
+
   encodeIntWith =
     base: alphabet: i:
-    concatMapStrings (elemAt alphabet) <| toBaseDigits base i;
+    joinMap (at alphabet) <| toBaseDigits base i;
 
-  fromHex = str: (fromTOML "i=0x${elemAt (match "(0x)?([0-7]?[0-9A-Fa-f]{1,15})" str) 1}").i;
+  fromHex = str: (fromTOML "i=0x${at (match "(0x)?([0-7]?[0-9A-Fa-f]{1,15})" str) 1}").i;
 
   toHex = encodeIntWith 16 [
     "0"
@@ -77,5 +85,5 @@ in
     assert isInt i;
     assert base >= 2;
     assert i >= 0;
-    reverseList <| recurse i;
+    reverse <| recurse i;
 }

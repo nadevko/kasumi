@@ -1,11 +1,11 @@
 final: prev:
 let
   attrs = {
+    inherit (builtins) mapAttrs;
     attr = builtins.hasAttr;
     fromPairs = builtins.listToAttrs;
     get = builtins.getAttr;
     intersectR = builtins.intersectAttrs;
-    mapValues = builtins.mapAttrs;
     names = builtins.attrNames;
     omit = removeAttrs;
     pluck = builtins.catAttrs;
@@ -125,16 +125,16 @@ let
     importWith = scopedImport;
   };
   strings = {
-    inherit toString;
     inherit (builtins) convertHash match split;
     fromJson = builtins.fromJSON;
     fromToml = fromTOML;
     hashWith = builtins.hashString;
     joinSep = builtins.concatStringsSep;
     length = builtins.stringLength;
-    replace = builtins.replaceStrings;
+    replaceAll = builtins.replaceStrings;
     slice = builtins.substring;
     toJson = builtins.toJSON;
+    toStr = toString;
   };
   types = {
     inherit
@@ -151,9 +151,9 @@ let
       isInt
       isList
       isPath
-      isString
       typeOf
       ;
+    isStr = builtins.isString;
   };
   versions = { inherit (builtins) compareVersions splitVersion; };
 
