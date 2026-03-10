@@ -16,16 +16,16 @@
       so = self.overlays;
     in
     {
-      polyfills = so.polyfills self.lib builtins;
-      shadow = self.polyfills // so.shadow self.lib self.polyfills;
+      compat = so.compat self.lib builtins;
+      shadow = self.compat // so.shadow self.lib self.compat;
       prim = self.shadow // so.prim self.lib self.shadow;
       lib = self.prim // so.lib self.lib self.prim;
 
       overlays = {
-        polyfills = import ./overlays/00-polyfills.nix;
-        shadow = import ./overlays/01-shadow.nix;
-        prim = import ./overlays/02-prim.nix;
-        lib = import ./overlays/03-lib.nix;
+        compat = import ./overlays/compat.nix;
+        shadow = import ./overlays/shadow.nix;
+        prim = import ./overlays/prim.nix;
+        lib = import ./overlays/lib.nix;
       };
     };
 }
