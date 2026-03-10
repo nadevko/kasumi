@@ -1,65 +1,18 @@
 final: prev:
 let
-  # --- bitAnd bitOr bitXor ---------------------------------------------------
-  tableAnd = mkTable (a: b: if a == 1 && b == 1 then 1 else 0);
-  tableOr = mkTable (a: b: if a == 1 || b == 1 then 1 else 0);
-  tableXor = mkTable (a: b: if a != b then 1 else 0);
+  inherit (import ../compat/bitOp.nix)
+    bitOp
+    tableAnd
+    tableOr
+    tableXor
+    ;
 
-  range = final.genList (x: x) 16;
-  mkTable = op: final.map (a: final.map (b: apply4 op a b) range) range;
-
-  apply4 =
-    op: a: b:
-    let
-      get =
-        n: i:
-        let
-          # n % 2
-          div =
-            if i == 0 then
-              1
-            else if i == 1 then
-              2
-            else if i == 2 then
-              4
-            else
-              8;
-        in
-        (n / div) - ((n / div) / 2 * 2);
-      r0 = op (get a 0) (get b 0);
-      r1 = op (get a 1) (get b 1);
-      r2 = op (get a 2) (get b 2);
-      r3 = op (get a 3) (get b 3);
-    in
-    r0 + r1 * 2 + r2 * 4 + r3 * 8;
-
-  bitOp =
-    table:
-    let
-      recurse =
-        a: b:
-        if a == 0 && b == 0 then
-          0
-        else
-          let
-            # n % 16
-            a_p = a - (a / 16 * 16);
-            b_p = b - (b / 16 * 16);
-            res = final.elemAt (final.elemAt table a_p) b_p;
-          in
-          res + 16 * (recurse (a / 16) (b / 16));
-    in
-    a: b:
-    assert a >= 0 && b >= 0;
-    if a == b then a else recurse a b;
-
-  # === api ===================================================================
   self = {
     # --- 2.1 -----------------------------------------------------------------
     bitAnd = prev.bitAnd or (bitOp tableAnd);
     bitOr = prev.bitOr or (bitOp tableOr);
     bitXor = prev.bitXor or (bitOp tableXor);
-    fromTOML = prev.fromTOML;
+    # fromTOML = prev.fromTOML; !!! TODO
     concatMap = prev.concatMap or (f: xs: final.concatLists (final.map f xs));
     mapAttrs =
       prev.mapAttrs or (
@@ -74,11 +27,11 @@ let
 
     # --- 2.3 -----------------------------------------------------------------
     isPath = prev.isPath or (x: final.typeOf x == "path");
-    hashFile = prev.hashFile;
+    # hashFile = prev.hashFile; !!! TODO
 
     # --- 2.4 -----------------------------------------------------------------
-    fetchTree = prev.fetchTree;
-    getFlake = prev.getFlake;
+    # fetchTree = prev.fetchTree; !!! TODO
+    # getFlake = prev.getFlake; !!! TODO
     floor =
       prev.floor or (
         x:
@@ -139,7 +92,25 @@ let
       );
 
     # --- 2.8 -----------------------------------------------------------------
-    fetchClosure = prev.fetchClosure;
+    fetchClosure =
+      prev.fetchClosure or (
+        args:
+        let
+          raw = if args ? toPath && args.toPath != "" then args.toPath else args.fromPath;
+          str = final.toString raw;
+          path = final.toPath str;
+        in
+        if final.pathExists path then
+          final.storePath path
+        else
+          final.abort ''
+             [1;31merror:[0m path '${path}' does not exist in the Nix store
+
+            This polyfill only supports paths already present in the local store 
+            (simulating final.storePath). To fetch from '${args.fromStore or "unknown cache"}',
+            upgrade to Nix 2.8+ or ensure the closure is pre-loaded.
+          ''
+      );
 
     # --- 2.9 -----------------------------------------------------------------
     break = prev.break or (x: x);
@@ -157,17 +128,17 @@ let
           dir = final.dirOf str;
           listing = final.readDir dir;
         in
-        listing.${base} or final.throw "[1;31merror:[0m path '${path}' does not exist"
+        listing.${base} or (final.throw "path '${path}' does not exist")
       );
 
     # --- 2.18 ----------------------------------------------------------------
-    parseFlakeRef = prev.parseFlakeRef;
-    flakeRefToString = prev.flakeRefToString;
+    # parseFlakeRef = prev.parseFlakeRef or (import ../compat/parseFlakeRef.nix final); !!! TODO
+    # flakeRefToString = prev.flakeRefToString or (import ../compat/flakeRefToString.nix final); !!! TODO
     outputOf =
       prev.outputOf or (output: drv: if final.isAttrs drv && drv ? ${output} then drv.${output} else drv);
 
     # --- 2.19 ----------------------------------------------------------------
-    convertHash = prev.convertHash;
+    # convertHash = prev.convertHash; !!! TODO
 
     # --- 2.23 ----------------------------------------------------------------
     warn =

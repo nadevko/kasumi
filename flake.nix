@@ -16,15 +16,15 @@
       so = self.overlays;
     in
     {
-      compat = so.compat self.lib builtins;
-      shadow = self.compat // so.shadow self.lib self.compat;
-      prim = self.shadow // so.prim self.lib self.shadow;
-      lib = self.prim // so.lib self.lib self.prim;
+      compat = so.compat self.compat builtins;
+      shadow = self.compat // so.shadow self.shadow self.compat;
+      primops = self.shadow // so.primops self.primops self.shadow;
+      lib = self.primops // so.lib self.lib self.primops;
 
       overlays = {
         compat = import ./overlays/compat.nix;
         shadow = import ./overlays/shadow.nix;
-        prim = import ./overlays/prim.nix;
+        primops = import ./overlays/primops.nix;
         lib = import ./overlays/lib.nix;
       };
     };

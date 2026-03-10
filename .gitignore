@@ -1,2 +1,4 @@
 result*
 .env.local
+pkgs
+nixos

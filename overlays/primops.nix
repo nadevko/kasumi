@@ -113,7 +113,7 @@ let
     nixStorePath = prev.storeDir;
   };
   prelude = {
-    inherit prim;
+    inherit primops;
     inherit (prev)
       false
       import
@@ -125,12 +125,12 @@ let
       isList
       isNull
       isPath
+      isString
       null
       true
       typeOf
       ;
     importWith = scopedImport;
-    isStr = prev.isString;
   };
   reflect = {
     inherit (prev)
@@ -167,7 +167,7 @@ let
       and it may be removed in the future.
     '';
 
-  prim =
+  primops =
     attrs.mapAttrs _deprecationWarn deprecated
     // attrs
     // dag
@@ -204,4 +204,4 @@ in
     ;
   inherit _deprecationWarn;
 }
-// prim
+// primops
