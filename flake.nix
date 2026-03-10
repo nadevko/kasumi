@@ -1,5 +1,5 @@
 {
-  description = "Nixpkgs Deconstruction Initiative";
+  description = "Nixpkgs Deconstruction Initiative // Library";
 
   nixConfig = {
     extra-experimental-features = [
@@ -13,27 +13,18 @@
   outputs =
     { self, ... }:
     let
-      lib = import ./lib { lib = so.builtins {} {}; };
+      lib = import ./lib { lib = self.builtins; };
       so = self.overlays;
     in
     {
       inherit lib;
+      builtins = so.relude { } { };
 
       overlays = {
-        default = import ./overlay.nix;
-
-        lib = import ./overlays/lib.nix;
-        builtins = import ./overlays/builtins.nix;
+        relude = import ./overlays/relude.nix;
         polyfills = import ./overlays/polyfills.nix;
         shadow = import ./overlays/shadow.nix;
-
-        augment = lib.augmentLib so.lib;
-        compat = import ./overlays/compat.nix;
+        lib = import ./overlays/lib.nix;
       };
-
-      formatter = lib.forAllPkgs self { } <| builtins.getAttr "kasumi-fmt";
-      devShells = lib.forAllPkgs self { } (pkgs: {
-        default = pkgs.callPackage ./shell.nix { };
-      });
     };
 }

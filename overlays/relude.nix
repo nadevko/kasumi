@@ -3,7 +3,7 @@ let
   attrs = {
     inherit (builtins) mapAttrs;
     attr = builtins.hasAttr;
-    fromPairs = builtins.listToAttrs;
+    collect = builtins.listToAttrs;
     get = builtins.getAttr;
     intersectR = builtins.intersectAttrs;
     names = builtins.attrNames;
@@ -12,20 +12,20 @@ let
     values = builtins.attrValues;
     zipWith = builtins.zipAttrsWith;
   };
+  dag = {
+    transitiveClosure = builtins.genericClosure;
+  };
   debug = {
     inherit abort break throw;
     inherit (builtins)
       deepSeq
-      functionArgs
       seq
-      tryEval
+      trace
       warn
       ;
+    deepTrace = builtins.traceVerbose;
     dump = builtins.toXML;
     explainFailure = builtins.addErrorContext;
-    log = builtins.trace;
-    trace = builtins.traceVerbose;
-    tryGetAttrPos = builtins.unsafeGetAttrPos;
   };
   deprecated = { inherit (builtins) toPath; };
   derivations = {
@@ -34,7 +34,6 @@ let
     dependOn = builtins.appendContext;
     derivation' = derivationStrict;
     getOutput = builtins.outputOf;
-    transitiveClosure = builtins.genericClosure;
     tryIgnoreDependency = builtins.unsafeDiscardOutputDependency;
     tryStripContext = builtins.unsafeDiscardStringContext;
     withOutputsOf = builtins.addDrvOutputDependencies;
@@ -50,12 +49,8 @@ let
     fetchUrl = builtins.fetchurl;
   };
   filesystem = {
-    inherit (builtins)
-      hashFile
-      pathExists
-      readDir
-      readFile
-      ;
+    inherit (builtins) hashFile readDir readFile;
+    exists = builtins.pathExists;
     findInNixPath = builtins.findFile;
     readType = builtins.readFileType;
     storeAs = builtins.toFile;
@@ -89,7 +84,7 @@ let
       tail
       ;
     at = builtins.elemAt;
-    fold' = builtins.foldl';
+    foldL' = builtins.foldl';
     generate = builtins.genList;
     size = builtins.length;
   };
@@ -109,40 +104,17 @@ let
   };
   meta = {
     inherit (builtins) compareVersions splitVersion;
-    splitDrvName = builtins.parseDrvName;
+    fromDrvName = builtins.parseDrvName;
   };
   paths = {
     basename = baseNameOf;
     dirname = dirOf;
     nixStorePath = builtins.storeDir;
   };
-  runtime = {
-    inherit import;
-    inherit (builtins)
-      currentSystem
-      currentTime
-      getEnv
-      langVersion
-      nixPath
-      nixVersion
-      ;
-    importWith = scopedImport;
-  };
-  strings = {
-    inherit (builtins) convertHash match split;
-    fromJson = builtins.fromJSON;
-    fromToml = fromTOML;
-    hashWith = builtins.hashString;
-    joinSep = builtins.concatStringsSep;
-    length = builtins.stringLength;
-    replaceAll = builtins.replaceStrings;
-    slice = builtins.substring;
-    toJson = builtins.toJSON;
-    toStr = toString;
-  };
-  types = {
+  prelude = {
     inherit
       false
+      import
       isNull
       null
       true
@@ -157,21 +129,66 @@ let
       isPath
       typeOf
       ;
+    builtins = relude;
+    importWith = scopedImport;
     isStr = builtins.isString;
   };
+  reflect = {
+    inherit (builtins)
+      currentSystem
+      currentTime
+      functionArgs
+      getEnv
+      langVersion
+      nixPath
+      nixVersion
+      tryEval
+      ;
+    tryGetAttrPos = builtins.unsafeGetAttrPos;
+  };
+  strings = {
+    inherit (builtins) convertHash match split;
+    fromJson = builtins.fromJSON;
+    fromToml = fromTOML;
+    hashWith = builtins.hashString;
+    joinSep = builtins.concatStringsSep;
+    length = builtins.stringLength;
+    replaceAll = builtins.replaceStrings;
+    slice = builtins.substring;
+    toJson = builtins.toJSON;
+    toStr = toString;
+  };
 
-  __deprecationWarn =
+  _deprecationWarn =
     n:
-    builtins.warn ''
+    debug.warn ''
       `kasumi.lib.${n}` has been moved to `kasumi.lib.deprecated.${n}`.
 
       It is still available there for compatibility, but its use is discouraged
       and it may be removed in the future.
     '';
+
+  relude =
+    attrs.mapAttrs _deprecationWarn deprecated
+    // attrs
+    // dag
+    // debug
+    // derivations
+    // fetchers
+    // filesystem
+    // flakes
+    // lists
+    // meta
+    // numeric
+    // paths
+    // prelude
+    // reflect
+    // strings;
 in
 {
   inherit
     attrs
+    dag
     debug
     deprecated
     derivations
@@ -182,23 +199,10 @@ in
     meta
     numeric
     paths
-    runtime
+    prelude
+    reflect
     strings
-    types
     ;
-  inherit __deprecationWarn;
+  inherit _deprecationWarn;
 }
-// attrs
-// debug
-// builtins.mapAttrs __deprecationWarn deprecated
-// derivations
-// fetchers
-// filesystem
-// flakes
-// lists
-// meta
-// numeric
-// paths
-// runtime
-// strings
-// types
+// relude

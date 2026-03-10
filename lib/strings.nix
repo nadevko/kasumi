@@ -11,7 +11,6 @@ let
     fold'
     size
     generate
-    elem
     imap0
     head
     tail
@@ -26,7 +25,6 @@ let
     joinMapSep
     joinMap
     joinAttrsSep
-    isStrConvertible
     joinWhereSep
     joinOptionalsSep
     replaceAll
@@ -42,8 +40,6 @@ let
     subChar
     subchars
     charAt
-    isList
-    all
     isPrintableAscii
     asciiUpper
     asciiLower
@@ -56,7 +52,6 @@ let
     toSentenceCase
     optionalStr
     match
-    isStrLike
     ;
 in
 prev.strings or { }
@@ -180,17 +175,6 @@ prev.strings or { }
     optionalStr (str != null) (head str);
 
   # --- checks ----------------------------------------------------------------
-  isStrLike = x: isStr x || isPath x || x ? outPath || x ? __toString;
-  isStrConvertible =
-    x:
-    isStrLike x
-    || elem (typeOf x) [
-      "null"
-      "int"
-      "float"
-      "bool"
-    ]
-    || (isList x && all isStrConvertible x);
 
   hasPrefix =
     seg: x:
