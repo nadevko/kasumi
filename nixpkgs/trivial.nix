@@ -5,12 +5,8 @@ let
     isFunction
     isInt
     functionArgs
-    pathExists
-    release
     setFunctionArgs
     toBaseDigits
-    version
-    versionSuffix
     warn
     ;
   inherit (lib) isString;
@@ -80,44 +76,6 @@ in
   mapNullable = f: a: if a == null then a else f a;
 
   ## nixpkgs version strings
-
-  version = release + versionSuffix;
-
-  release = lib.strings.fileContents ./.version;
-
-  oldestSupportedRelease =
-    # Update on master only. Do not backport.
-    2511;
-
-  isInOldestRelease =
-    lib.warnIf (lib.oldestSupportedReleaseIsAtLeast 2411)
-      "lib.isInOldestRelease is deprecated. Use lib.oldestSupportedReleaseIsAtLeast instead."
-      lib.oldestSupportedReleaseIsAtLeast;
-
-  oldestSupportedReleaseIsAtLeast = release: release <= lib.trivial.oldestSupportedRelease;
-
-  codeName = "Yarara";
-
-  versionSuffix =
-    let
-      suffixFile = ../.version-suffix;
-    in
-    if pathExists suffixFile then lib.strings.fileContents suffixFile else "pre-git";
-
-  revisionWithDefault =
-    default:
-    let
-      revisionFile = "${toString ./..}/.git-revision";
-      gitRepo = "${toString ./..}/.git";
-    in
-    if lib.pathIsGitRepo gitRepo then
-      lib.commitIdFromGitRepo gitRepo
-    else if lib.pathExists revisionFile then
-      lib.fileContents revisionFile
-    else
-      default;
-
-  nixpkgsVersion = warn "lib.nixpkgsVersion is a deprecated alias of lib.version." version;
 
   inNixShell = builtins.getEnv "IN_NIX_SHELL" != "";
 

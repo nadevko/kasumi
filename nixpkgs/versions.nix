@@ -23,4 +23,16 @@ rec {
     lib.concatStringsSep "." (lib.take n (lib.splitVersion numericVersion ++ lib.genList (_: "0") n))
     + versionSuffix;
 
+  revisionWithDefault =
+    default:
+    let
+      revisionFile = "${toString ./..}/.git-revision";
+      gitRepo = "${toString ./..}/.git";
+    in
+    if lib.pathIsGitRepo gitRepo then
+      lib.commitIdFromGitRepo gitRepo
+    else if lib.pathExists revisionFile then
+      lib.fileContents revisionFile
+    else
+      default;
 }
