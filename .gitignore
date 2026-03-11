@@ -2,3 +2,4 @@ result*
 .env.local
 pkgs
 nixos
+nixpkgs
