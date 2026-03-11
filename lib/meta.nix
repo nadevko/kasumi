@@ -25,7 +25,7 @@ let
   inherit (final.meta)
     splitVersion
     compareVersions
-    splitDrvName
+    fromDrvName
     padVersionSep
     versionNumeric
     versionOlder
@@ -36,8 +36,8 @@ in
 prev.meta or { }
 // {
   # --- derivation name -------------------------------------------------------
-  idPname = x: (splitDrvName x).name;
-  idVersion = x: (splitDrvName x).version;
+  idPname = x: (fromDrvName x).name;
+  idVersion = x: (fromDrvName x).version;
 
   pname = x: if isStr x then idPname x else x.pname or (idPname x.name);
   version = x: if isStr x then idVersion x else x.version or (idVersion x.name);
@@ -50,6 +50,26 @@ prev.meta or { }
     in
     assert name != filename;
     name;
+
+  appendToPname =
+    suffix: drv:
+    drv
+    // (
+      if drv ? pname && drv ? version then
+        rec {
+          pname = "${drv.pname}-${suffix}";
+          name = "${pname}-${drv.version}";
+        }
+      else
+        let
+          inherit (fromDrvName drv.name) name version;
+          pname = "${name}-${suffix}";
+        in
+        {
+          name = "${pname}-${version}";
+          inherit pname version;
+        }
+    );
 
   # --- version splits --------------------------------------------------------
   major = compose head splitVersion;

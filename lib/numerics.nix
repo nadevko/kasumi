@@ -10,10 +10,10 @@ let
     lt
     ;
   inherit (final.strings) joinMap match;
-  inherit (final.prelude) flip;
+  inherit (final.prelude) flip withDefault;
 
   inherit (final.numeric)
-    toIntWith
+    toIntBase
     toBaseDigits
     max
     min
@@ -29,7 +29,15 @@ in
   le = a: b: !lt b a;
   ge = a: b: !lt a b;
 
-  # --- extremes --------------------------------------------------------------
+  compare =
+    a: b:
+    if a < b then
+      -1
+    else if a > b then
+      1
+    else
+      0;
+
   min = a: b: if a < b then a else b;
   max = a: b: if a > b then a else b;
 
@@ -38,17 +46,22 @@ in
 
   clamp =
     minX: maxX: x:
-    max minX <| min x maxX x;
+    max minX <| min x maxX;
+
+  # --- extremes --------------------------------------------------------------
 
   bitNot = sub (-1);
 
-  toIntWith =
+  toIntBase =
     base: alphabet: i:
     joinMap (at alphabet) <| toBaseDigits base i;
 
-  fromHex = str: (fromTOML "i=0x${at (match "(0x)?([0-7]?[0-9A-Fa-f]{1,15})" str) 1}").i;
+  fromHex =
+    str:
+    (fromTOML "i=0x${at (withDefault (throw "fromHex: ${str} is not a valid hex value.") (match "(0x)?([0-7]?[0-9A-Fa-f]{1,15})" str)) 1}")
+    .i;
 
-  toHex = toIntWith 16 [
+  toHex = toIntBase 16 [
     "0"
     "1"
     "2"

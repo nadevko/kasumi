@@ -31,20 +31,6 @@ rec {
 
   dontDistribute = drv: addMetaAttrs { hydraPlatforms = [ ]; } drv;
 
-  setName = name: drv: drv // { inherit name; };
-
-  updateName = updater: drv: drv // { name = updater (drv.name); };
-
-  appendToName =
-    suffix:
-    updateName (
-      name:
-      let
-        x = builtins.parseDrvName name;
-      in
-      "${x.name}-${suffix}-${x.version}"
-    );
-
   mapDerivationAttrset =
     f: set: lib.mapAttrs (name: pkg: if lib.isDerivation pkg then (f pkg) else pkg) set;
 

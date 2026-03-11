@@ -43,8 +43,8 @@ let
 in
 {
 
-  importJSON = compose fromJson readFile;
-  importTOML = compose fromToml readFile;
+  importJson = compose fromJson readFile;
+  importToml = compose fromToml readFile;
 
   readDirPaths = root: mapAttrs (n: _: root + "/${n}") <| readDir root;
 

@@ -20,27 +20,12 @@ let
   inherit (final.strings) levenshteinAtMost levenshtein;
   inherit (final.customisation) makeOverridable;
 
-  inherit (final.trivial) invoke compose;
+  inherit (final.trivial) invoke;
   inherit (final.debug) attrPos;
 
-  inherit (final.di)
-    setAnnotation
-    getAnnotation
-    callPackageBy
-    callWith
-    ;
+  inherit (final.di) callPackageBy callWith;
 in
 {
-  getAnnotation =
-    f: if f ? __functor then f.__functionArgs or (functionArgs <| f.__functor f) else functionArgs f;
-
-  setAnnotation = args: f: {
-    __functor = _: f;
-    __annotation = args;
-  };
-
-  inheritAnnotationFrom = compose setAnnotation getAnnotation;
-
   callWith =
     context: f: overrides:
     let

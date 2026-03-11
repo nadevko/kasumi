@@ -11,7 +11,7 @@ let
   inherit (final.lists) foldr;
   inherit (final.trivial) flip;
 
-  inherit (final.debug) attrPos';
+  inherit (final.debug) attrPos' throw;
 in
 {
   validateEnumList =
@@ -22,11 +22,11 @@ in
     assert
       unexpected == [ ]
       ||
-        msg
+        throw (msg
         + ": "
         + (concatStringsSep ", " <| map toString unexpected)
         + " unexpected; valid ones: "
-        + (concatStringsSep ", " <| map toString valid);
+        + (concatStringsSep ", " <| map toString valid));
     given;
 
   info = msg: trace "INFO: ${msg}";

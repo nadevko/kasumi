@@ -7,13 +7,14 @@ let
     flip
     isFunction
     isFunctor
-    isStr
-    isStrLike
+    isString
+    isStringLike
     pipe
     typeOf
+    isPathLike
     isList
     isPath
-    isStrCast
+    isStringAble
     ;
 in
 prev.prelude or { }
@@ -69,13 +70,16 @@ prev.prelude or { }
   withDefault = default: maybe: if maybe == null then default else maybe;
 
   # --- type predicates -------------------------------------------------------
-  isAppliable = f: isFunction f || isFunctor f;
-  isFunctor = f: f ? __functor && isFunction (f.__functor f);
-  isStrLike = x: isStr x || isPath x || x ? outPath || x ? __toString;
-  isStrCast =
+  isPathLike = x: isPath x || x ? outPath;
+
+  isFunctionLike = f: isFunction f || isFunctor f;
+  isFunctor = f: f ? __functor;
+
+  isStringLike = x: isString x || isPathLike x || x ? __toString;
+  isStringAble =
     x:
-    isStrLike x
-    || isList x && all isStrCast x
+    isStringLike x
+    || isList x && all isStringAble x
     || elem (typeOf x) [
       "null"
       "int"

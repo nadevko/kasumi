@@ -131,7 +131,6 @@ let
         throwIf
         throwIfNot
         checkListOfEnum
-        info
         showWarnings
         nixpkgsVersion
         version
