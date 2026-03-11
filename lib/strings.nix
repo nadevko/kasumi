@@ -38,7 +38,6 @@ let
     asciiSet
     ascii
     subChar
-    subchars
     charAt
     isPrintableAscii
     asciiUpper
@@ -100,7 +99,7 @@ prev.strings or { }
   c0 = chars "\t\n\r";
   asciiLower = chars "abcdefghijklmnopqrstuvwxyz";
   asciiUpper = chars "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  asciiSet = imap0 (flip pair) ascii |> filter (x: x.name != null) |> fromPairs;
+  asciiSet = imap0 (flip pair) ascii |> filter (x: isPrintableAscii x.value) |> fromPairs;
   unreserved = chars "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.~";
 
   isPrintableAscii = i: 8 < i && i < 14 || 31 < i && i < 127;
