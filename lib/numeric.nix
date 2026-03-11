@@ -13,7 +13,7 @@ let
   inherit (final.prelude) flip;
 
   inherit (final.numeric)
-    encodeIntWith
+    toIntWith
     toBaseDigits
     max
     min
@@ -42,13 +42,13 @@ in
 
   bitNot = sub (-1);
 
-  encodeIntWith =
+  toIntWith =
     base: alphabet: i:
     joinMap (at alphabet) <| toBaseDigits base i;
 
   fromHex = str: (fromTOML "i=0x${at (match "(0x)?([0-7]?[0-9A-Fa-f]{1,15})" str) 1}").i;
 
-  toHex = encodeIntWith 16 [
+  toHex = toIntWith 16 [
     "0"
     "1"
     "2"

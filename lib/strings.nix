@@ -95,10 +95,13 @@ prev.strings or { }
   charsMap = f: x: chars x |> joinMap f;
 
   # --- ascii -----------------------------------------------------------------
-  ascii = subchars "\t\n\r !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+  ascii = chars "\t\n\r !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+  asciiPrintable = chars " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+  c0 = chars "\t\n\r";
   asciiLower = chars "abcdefghijklmnopqrstuvwxyz";
   asciiUpper = chars "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   asciiSet = imap0 (flip pair) ascii |> filter (x: x.name != null) |> fromPairs;
+  unreserved = chars "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.~";
 
   isPrintableAscii = i: 8 < i && i < 14 || 31 < i && i < 127;
   fromAscii = x: if asciiSet ? ${x} then asciiSet.${x} else null;
@@ -128,9 +131,6 @@ prev.strings or { }
       rest = map toSentenceCase <| tail parts;
     in
     if parts == [ ] then "" else join <| [ first ] ++ rest;
-
-  # --- rfc3986 ---------------------------------------------------------------
-  unreserved = chars "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.~";
 
   # --- generators ------------------------------------------------------------
   repeat = n: x: join <| replicate n x;
