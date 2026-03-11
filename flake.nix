@@ -11,21 +11,18 @@
   };
 
   outputs =
-    { self, ... }:
-    let
-      so = self.overlays;
-    in
+    { ... }:
     {
-      compat = so.compat self.compat builtins;
-      shadow = self.compat // so.shadow self.shadow self.compat;
-      primops = self.shadow // so.primops self.primops self.shadow;
-      lib = self.primops // so.lib self.lib self.primops;
+      compat = import ./compat { };
+      shadow = import ./shadow { };
+      primops = import ./primops { };
+      lib = import ./lib { };
 
       overlays = {
-        compat = import ./overlays/compat.nix;
-        shadow = import ./overlays/shadow.nix;
-        primops = import ./overlays/primops.nix;
-        lib = import ./overlays/lib.nix;
+        compat = import ./compat/overlay.nix;
+        shadow = import ./shadow/overlay.nix;
+        primops = import ./primops/overlay.nix;
+        lib = import ./lib/overlay.nix;
       };
     };
 }

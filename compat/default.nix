@@ -1,8 +1,8 @@
 {
-  lib ? import ../primops,
+  lib ? builtins,
   ...
 }:
 let
   self = import ./overlay.nix self lib;
 in
-self.attrs.pointwiseR lib self
+lib // self
