@@ -1,5 +1,5 @@
 {
-  lib ? import ../compat,
+  lib ? import ../compat { },
   ...
 }:
 let

@@ -23,11 +23,8 @@ jq '{
 
 jq -Sc --slurpfile nix "$L_NIX" '
   .licenses | reduce .[] as $l ({}; 
-    ([$l.isOsiApproved, $l.isFsfLibre] | all(. != false)) as $free |
     . + { ($l.licenseId): (
-    { name: $l.name,
-      free: $free,
-      redistributable: $free }
+    {name: $l.name}
     | . + (if $l.isOsiApproved == false then {osiApproved: false} else {} end)
     | . + (if $l.isFsfLibre == false then {fsfLibre: false} else {} end)
     | . + (if $l.isDeprecatedLicenseId == true then {deprecated: true} else {} end)
@@ -44,5 +41,4 @@ jq -Sc --slurpfile nix "$E_NIX" '
   )
 ' "$E_SPDX" > "$E"
 
-rm "$L_SPDX"
-rm "$E_SPDX"
+rm "$L_SPDX" "$E_SPDX"

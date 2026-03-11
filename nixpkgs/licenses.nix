@@ -108,21 +108,6 @@ lib.mapAttrs mkLicense {
     fullName = "Arphic Public License";
   };
 
-  artistic1 = {
-    spdxId = "Artistic-1.0";
-    fullName = "Artistic License 1.0";
-  };
-
-  artistic1-cl8 = {
-    spdxId = "Artistic-1.0-cl8";
-    fullName = "Artistic License 1.0 w/clause 8";
-  };
-
-  artistic2 = {
-    spdxId = "Artistic-2.0";
-    fullName = "Artistic License 2.0";
-  };
-
   baekmuk = {
     spdxId = "Baekmuk";
     fullName = "Baekmuk License";
@@ -243,11 +228,6 @@ lib.mapAttrs mkLicense {
   clArtistic = {
     spdxId = "ClArtistic";
     fullName = "Clarified Artistic License";
-  };
-
-  cc0 = {
-    spdxId = "CC0-1.0";
-    fullName = "Creative Commons Zero v1.0 Universal";
   };
 
   cc-by-nc-nd-30 = {
@@ -474,16 +454,6 @@ lib.mapAttrs mkLicense {
     fullName = "Seiko Epson Corporation Software License Agreement for Linux";
     url = "https://download.ebz.epson.net/dsc/du/02/eula/global/LINUX_EN.html";
     free = false;
-  };
-
-  eupl11 = {
-    spdxId = "EUPL-1.1";
-    fullName = "European Union Public License 1.1";
-  };
-
-  eupl12 = {
-    spdxId = "EUPL-1.2";
-    fullName = "European Union Public License 1.2";
   };
 
   ffsl = {
@@ -985,21 +955,6 @@ lib.mapAttrs mkLicense {
     fullName = "Open Publication License v1.0";
   };
 
-  osl2 = {
-    spdxId = "OSL-2.0";
-    fullName = "Open Software License 2.0";
-  };
-
-  osl21 = {
-    spdxId = "OSL-2.1";
-    fullName = "Open Software License 2.1";
-  };
-
-  osl3 = {
-    spdxId = "OSL-3.0";
-    fullName = "Open Software License 3.0";
-  };
-
   paratype = {
     fullName = "ParaType Free Font Licensing Agreement";
     url = "https://web.archive.org/web/20161209023955/http://www.paratype.ru/public/pt_openlicense_eng.asp";
@@ -1255,11 +1210,6 @@ lib.mapAttrs mkLicense {
     fullName = "Unicode Terms of Use";
   };
 
-  upl = {
-    spdxId = "UPL-1.0";
-    fullName = "Universal Permissive License";
-  };
-
   vim = {
     spdxId = "Vim";
     fullName = "Vim License";
@@ -1303,11 +1253,6 @@ lib.mapAttrs mkLicense {
   wadalab = {
     fullName = "Wadalab Font License";
     url = "https://fedoraproject.org/wiki/Licensing:Wadalab?rd=Licensing/Wadalab";
-  };
-
-  wtfpl = {
-    spdxId = "WTFPL";
-    fullName = "Do What The F*ck You Want To Public License";
   };
 
   wxWindowsException31 = {

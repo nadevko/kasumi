@@ -53,14 +53,14 @@ prev.attrs or { }
     wrong = bindAttrs (n: v: if !pred n v then singletonPair n v else [ ]) set;
   };
 
-  pointwisel =
+  pointwiseL =
     base: augment:
     base
     // mapAttrs (
       n: v: if isAttrs v && isAttrs (base.${n} or null) then v // base.${n} else base.${n} or v
     ) augment;
 
-  pointwiser =
+  pointwiseR =
     base: override:
     base
     // mapAttrs (n: v: if isAttrs v && isAttrs (base.${n} or null) then base.${n} // v else v) override;
