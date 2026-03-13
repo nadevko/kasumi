@@ -1,7 +1,6 @@
 As I fully deconstruct nixpkgs,
 
 - [ ] builtins polyfills
-- [ ] builtins shadows
 - [ ] nixpkgs.lib
 - [ ] stdenv
 - [ ] update scripts

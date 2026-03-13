@@ -2,12 +2,12 @@ final: prev:
 let
   attrs = {
     inherit (prev) mapAttrs;
-    attr = prev.hasAttr;
-    collect = prev.listToAttrs;
-    get = prev.getAttr;
+    attr' = prev.hasAttr;
+    get' = prev.getAttr;
     intersectR = prev.intersectAttrs;
     names = prev.attrNames;
-    omit = prev.removeAttrs;
+    ofPairs = prev.listToAttrs;
+    omit = names: set: prev.removeAttrs set names;
     pluck = prev.catAttrs;
     values = prev.attrValues;
     zipWith = prev.zipAttrsWith;
@@ -29,7 +29,6 @@ let
     dump = prev.toXML;
     explainFailure = prev.addErrorContext;
   };
-  deprecated = { inherit (prev) toPath; };
   derivations = {
     inherit (prev)
       derivation
@@ -39,7 +38,7 @@ let
       ;
     dependOn = prev.appendContext;
     derivation' = prev.derivationStrict;
-    getOutput = prev.outputOf;
+    getOutput = name: drv: prev.outputOf drv name;
     tryIgnoreDependency = prev.unsafeDiscardOutputDependency;
     tryStripContext = prev.unsafeDiscardStringContext;
     withOutputsOf = prev.addDrvOutputDependencies;
@@ -75,19 +74,19 @@ let
       any
       concatLists
       concatMap
-      elem
       filter
       groupBy
-      head
       map
       partition
-      sort
-      tail
       ;
-    at = prev.elemAt;
+    at' = i: xs: prev.elemAt xs i;
+    elem = xs: x: prev.elem x xs;
     foldL' = prev.foldl';
     generate = prev.genList;
+    head' = prev.head;
     size = prev.length;
+    sortBy = prev.sort;
+    tail' = prev.tail;
   };
   numeric = {
     inherit (prev)
@@ -108,6 +107,7 @@ let
     fromDrvName = prev.parseDrvName;
   };
   paths = {
+    inherit (prev) toPath;
     basename = prev.baseNameOf;
     dirname = prev.dirOf;
     nixStorePath = prev.storeDir;
@@ -130,7 +130,7 @@ let
       true
       typeOf
       ;
-    importWith = scopedImport;
+    importWith = prev.scopedImport;
   };
   reflect = {
     inherit (prev)
@@ -146,10 +146,14 @@ let
     tryGetAttrPos = prev.unsafeGetAttrPos;
   };
   strings = {
-    inherit (prev) convertHash match split;
+    inherit (prev)
+      convertHash
+      hashString
+      match
+      split
+      ;
     fromJson = prev.fromJSON;
-    fromToml = fromTOML;
-    hashWith = prev.hashString;
+    fromToml = prev.fromTOML;
     joinSep = prev.concatStringsSep;
     length = prev.stringLength;
     replaceAll = prev.replaceStrings;
@@ -158,18 +162,8 @@ let
     toStr = prev.toString;
   };
 
-  _deprecationWarn =
-    n:
-    debug.warn ''
-      `${n}` has been moved to `deprecated.${n}`.
-
-      It is still available there for compatibility, but its use is discouraged
-      and it may be removed in the future.
-    '';
-
   primops =
-    attrs.mapAttrs _deprecationWarn deprecated
-    // attrs
+    attrs
     // dag
     // debug
     // derivations
@@ -189,7 +183,6 @@ in
     attrs
     dag
     debug
-    deprecated
     derivations
     fetchers
     filesystem
@@ -202,6 +195,5 @@ in
     reflect
     strings
     ;
-  inherit _deprecationWarn;
 }
 // primops

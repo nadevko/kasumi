@@ -5,7 +5,6 @@ let
     warn
     subtractLists
     concatStringsSep
-    trace
     ;
 
   inherit (final.lists) foldr;
@@ -21,15 +20,15 @@ in
     in
     assert
       unexpected == [ ]
-      ||
-        throw (msg
+      || throw (
+        msg
         + ": "
         + (concatStringsSep ", " <| map toString unexpected)
         + " unexpected; valid ones: "
-        + (concatStringsSep ", " <| map toString valid));
+        + (concatStringsSep ", " <| map toString valid)
+      );
     given;
 
-  info = msg: trace "INFO: ${msg}";
   withWarns = flip <| foldr warn;
 
   attrPos' =

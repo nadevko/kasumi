@@ -125,7 +125,7 @@ in
 
     # etc
     bsl1 = licenses-by-spdx."BSL-1.0";
-    cc0 = licenses-by-spdx."CC01";
+    cc0 = licenses-by-spdx."CC-0.1";
     cpl1 = licenses-by-spdx."CPL-1.0";
     isc = licenses-by-spdx."ISC";
     mspl = licenses-by-spdx."MS-PL";

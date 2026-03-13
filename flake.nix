@@ -14,13 +14,11 @@
     { ... }:
     {
       compat = import ./compat { };
-      shadow = import ./shadow { };
       primops = import ./primops { };
       lib = import ./lib { };
 
       overlays = {
         compat = import ./compat/overlay.nix;
-        shadow = import ./shadow/overlay.nix;
         primops = import ./primops/overlay.nix;
         lib = import ./lib/overlay.nix;
       };

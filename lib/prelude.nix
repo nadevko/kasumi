@@ -3,23 +3,27 @@ let
   inherit (final.lists) foldl' elem all;
 
   inherit (final.prelude)
+    bind
     fapply
+    fixWith
     flip
+    import
     isFunction
+    isFunctionLike
     isFunctor
-    isString
-    isStringLike
-    pipe
-    typeOf
-    isPathLike
     isList
     isPath
+    isPathLike
+    isString
     isStringAble
+    isStringLike
+    null
+    pipe
+    typeOf
     ;
 in
-prev.prelude or { }
-// {
-  # --- realisation -----------------------------------------------------------
+{
+  # --- combinators -----------------------------------------------------------
   id = x: x;
   const = x: _: x;
   snd = _: y: y;
@@ -43,6 +47,13 @@ prev.prelude or { }
   pipe = foldl' fapply;
   fpipe = flip pipe;
 
+  ifElse =
+    pred: f: g: x:
+    if pred x then f x else g x;
+  boolAs =
+    yes: no: cond:
+    if cond then yes else no;
+
   # --- language operators ----------------------------------------------------
   update = a: b: a // b;
   concat = a: b: a ++ b;
@@ -55,19 +66,21 @@ prev.prelude or { }
   boolXor = a: b: (!a) != (!b);
   boolImply = a: b: a -> b;
 
-  # --- if statement & basic optionals ----------------------------------------
-  ifElse =
-    cond: yes: no:
-    if cond then yes else no;
-  boolAs =
-    yes: no: cond:
-    if cond then yes else no;
-  choice =
-    pred: f: g: x:
-    if pred x then f x else g x;
+  attr = name: set: set ? ${name};
+  getWith =
+    default: name: set:
+    set.${name} or default;
 
-  mayApply = f: maybe: if maybe == null then null else f maybe;
+  # --- optionals -------------------------------------------------------------
+  bind = f: maybe: if maybe == null then null else f maybe;
+  do = foldl' (flip bind);
   withDefault = default: maybe: if maybe == null then default else maybe;
+  alt =
+    f: y: x:
+    let
+      x' = f x;
+    in
+    if x' == null then f y else x';
 
   # --- type predicates -------------------------------------------------------
   isPathLike = x: isPath x || x ? outPath;
@@ -87,25 +100,29 @@ prev.prelude or { }
       "bool"
     ];
 
-  # --- coercion --------------------------------------------------------
-  invoke = f: if isFunction f then f else import f;
-  toFunction = v: if isFunction v then v else _: v;
-  toFunctor = v: if isFunctor v then v else { __functor = _: v; };
+  # --- coercion --------------------------------------------------------------
+  invoke = f: if isFunctionLike f then f else import f;
+  toFunctionLike = f: if isFunctionLike f then f else _: f;
+  toFunctor = f: if isFunctor f then f else { __functor = _: f; };
+  toFunction =
+    f:
+    if isFunction f then
+      f
+    else if isFunctor f then
+      f f
+    else
+      _: f;
 
-  # --- basic fixpoints (tying the knot) --------------------------------------
-  fix =
-    rattrs:
-    let
-      self = rattrs self;
-    in
-    self;
-
-  fix' =
-    rattrs:
+  # --- fixpoints -------------------------------------------------------------
+  fixWith =
+    name: rattrs:
     let
       self = rattrs self // {
-        inherit rattrs;
+        ${name} = rattrs;
       };
     in
     self;
+
+  fix = fixWith null;
+  fixate = fixWith "rattrs";
 }
