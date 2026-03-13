@@ -1,16 +1,16 @@
 final: prev:
 let
   attrs = {
-    inherit (prev) mapAttrs;
-    attr' = prev.hasAttr;
-    get' = prev.getAttr;
+    attr = prev.hasAttr;
+    get = prev.getAttr;
     intersectR = prev.intersectAttrs;
+    mapValues = prev.mapAttrs;
     names = prev.attrNames;
     ofPairs = prev.listToAttrs;
     omit = names: set: prev.removeAttrs set names;
     pluck = prev.catAttrs;
     values = prev.attrValues;
-    zipWith = prev.zipAttrsWith;
+    zipBy = prev.zipAttrsWith;
   };
   dag = {
     transitiveClosure = prev.genericClosure;
@@ -30,18 +30,18 @@ let
     explainFailure = prev.addErrorContext;
   };
   derivations = {
+    _shallowContext = prev.unsafeDiscardOutputDependency;
+    _stripContext = prev.unsafeDiscardStringContext;
     inherit (prev)
       derivation
       getContext
       hasContext
       placeholder
       ;
-    dependOn = prev.appendContext;
     derivation' = prev.derivationStrict;
     getOutput = name: drv: prev.outputOf drv name;
-    tryIgnoreDependency = prev.unsafeDiscardOutputDependency;
-    tryStripContext = prev.unsafeDiscardStringContext;
-    withOutputsOf = prev.addDrvOutputDependencies;
+    withContext = prev.appendContext;
+    withDeepContext = prev.addDrvOutputDependencies;
   };
   fetchers = {
     inherit (prev)
@@ -54,12 +54,16 @@ let
     fetchUrl = prev.fetchurl;
   };
   filesystem = {
-    inherit (prev) hashFile readDir readFile;
+    inherit (prev)
+      hashFile
+      readDir
+      readFile
+      storePath
+      ;
     exists = prev.pathExists;
     findInNixPath = prev.findFile;
     readType = prev.readFileType;
     storeAs = prev.toFile;
-    storePath = prev.storePath;
     storeWhere = prev.filterSource;
     storeWith = prev.path;
   };
@@ -74,19 +78,19 @@ let
       any
       concatLists
       concatMap
-      filter
       groupBy
+      head
       map
       partition
+      tail
       ;
-    at' = i: xs: prev.elemAt xs i;
+    at = i: xs: prev.elemAt xs i;
     elem = xs: x: prev.elem x xs;
     foldL' = prev.foldl';
     generate = prev.genList;
-    head' = prev.head;
     size = prev.length;
     sortBy = prev.sort;
-    tail' = prev.tail;
+    where = prev.filter;
   };
   numeric = {
     inherit (prev)
@@ -133,6 +137,7 @@ let
     importWith = prev.scopedImport;
   };
   reflect = {
+    _getAttrPos = prev.unsafeGetAttrPos;
     inherit (prev)
       currentSystem
       currentTime
@@ -141,9 +146,8 @@ let
       langVersion
       nixPath
       nixVersion
-      tryEval
       ;
-    tryGetAttrPos = prev.unsafeGetAttrPos;
+    try = prev.tryEval;
   };
   strings = {
     inherit (prev)
@@ -151,15 +155,15 @@ let
       hashString
       match
       split
+      toString
       ;
     fromJson = prev.fromJSON;
     fromToml = prev.fromTOML;
     joinSep = prev.concatStringsSep;
     length = prev.stringLength;
     replaceAll = prev.replaceStrings;
-    slice = prev.substring;
+    substr = prev.substring;
     toJson = prev.toJSON;
-    toStr = prev.toString;
   };
 
   primops =
