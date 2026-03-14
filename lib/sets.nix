@@ -16,7 +16,7 @@ let
   inherit (final.lists) singleton;
   inherit (final.trivial) compose id snd;
 
-  inherit (final.attrs)
+  inherit (final.sets)
     attr
     pair
     bindAttrs

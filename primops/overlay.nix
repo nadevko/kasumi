@@ -1,16 +1,5 @@
 final: prev:
 let
-  attrs = {
-    attr = prev.hasAttr;
-    get = prev.getAttr;
-    intersectR = prev.intersectAttrs;
-    mapValues = prev.mapAttrs;
-    names = prev.attrNames;
-    ofPairs = prev.listToAttrs;
-    omit = names: set: prev.removeAttrs set names;
-    values = prev.attrValues;
-    zipBy = prev.zipAttrsWith;
-  };
   dag = {
     transitiveClosure = prev.genericClosure;
   };
@@ -24,41 +13,29 @@ let
       trace
       warn
       ;
+    annotateError = prev.addErrorContext;
     deepTrace = prev.traceVerbose;
     dump = prev.toXML;
-    explainFailure = prev.addErrorContext;
   };
   derivations = {
-    _shallowContext = prev.unsafeDiscardOutputDependency;
     _stripContext = prev.unsafeDiscardStringContext;
-    inherit (prev)
-      derivation
-      getContext
-      hasContext
-      placeholder
-      ;
+    _stripDeepContext = prev.unsafeDiscardOutputDependency;
+    inherit (prev) derivation hasContext placeholder;
+    contextOf = prev.getContext;
     derivation' = prev.derivationStrict;
     getOutput = name: drv: prev.outputOf drv name;
+    requireStorePath = prev.storePath;
     withContext = prev.appendContext;
     withDeepContext = prev.addDrvOutputDependencies;
   };
   fetchers = {
-    inherit (prev)
-      fetchClosure
-      fetchGit
-      fetchMercurial
-      fetchTarball
-      fetchTree
-      ;
+    inherit (prev) fetchGit fetchMercurial fetchTarball;
+    fetchRef = prev.fetchTree;
+    fetchStore = prev.fetchClosure;
     fetchUrl = prev.fetchurl;
   };
   filesystem = {
-    inherit (prev)
-      hashFile
-      readDir
-      readFile
-      storePath
-      ;
+    inherit (prev) hashFile readDir readFile;
     exists = prev.pathExists;
     findInNixPath = prev.findFile;
     readType = prev.readFileType;
@@ -75,17 +52,16 @@ let
     inherit (prev)
       all
       any
-      concatLists
       concatMap
-      groupBy
       head
       map
       partition
       tail
       ;
     at = i: xs: prev.elemAt xs i;
+    concatAll = prev.concatLists;
     elem = xs: x: prev.elem x xs;
-    foldL' = prev.foldl';
+    foldLeft' = prev.foldl';
     generate = prev.genList;
     pluck = prev.catAttrs;
     size = prev.length;
@@ -95,15 +71,15 @@ let
   numeric = {
     inherit (prev)
       add
-      bitAnd
-      bitOr
-      bitXor
       ceil
       div
       floor
       mul
       sub
       ;
+    band = prev.bitAnd;
+    bor = prev.bitOr;
+    bxor = prev.bitXor;
     lt = prev.lessThan;
   };
   meta = {
@@ -112,8 +88,8 @@ let
   };
   paths = {
     inherit (prev) toPath;
-    basename = prev.baseNameOf;
-    dirname = prev.dirOf;
+    basenameOf = prev.baseNameOf;
+    dirnameOf = prev.dirOf;
     nixStorePath = prev.storeDir;
   };
   prelude = {
@@ -121,10 +97,8 @@ let
     inherit (prev)
       false
       import
-      isAttrs
       isBool
       isFloat
-      isFunction
       isInt
       isList
       isNull
@@ -135,19 +109,33 @@ let
       typeOf
       ;
     importWith = prev.scopedImport;
+    isLambda = prev.isFunction;
+    isSet = prev.isAttrs;
   };
   reflect = {
     _getAttrPos = prev.unsafeGetAttrPos;
     inherit (prev)
       currentSystem
       currentTime
-      functionArgs
       getEnv
       langVersion
       nixPath
       nixVersion
       ;
+    lambdaArgsOf = prev.functionArgs;
     try = prev.tryEval;
+  };
+  sets = {
+    attr = prev.hasAttr;
+    get = prev.getAttr;
+    groupMap = prev.zipAttrsWith;
+    groupWhere = prev.groupBy;
+    intersectRight = prev.intersectAttrs;
+    mapValues = prev.mapAttrs;
+    namesOf = prev.attrNames;
+    ofPairs = prev.listToAttrs;
+    omit = names: set: prev.removeAttrs set names;
+    valuesOf = prev.attrValues;
   };
   strings = {
     inherit (prev)
@@ -166,38 +154,43 @@ let
     toJson = prev.toJSON;
   };
 
-  primops =
-    attrs
-    // dag
-    // debug
-    // derivations
-    // fetchers
-    // filesystem
-    // flakes
-    // lists
-    // meta
-    // numeric
-    // paths
-    // prelude
-    // reflect
-    // strings;
+  primops = {
+    inherit primops;
+  }
+  // dag
+  // debug
+  // derivations
+  // fetchers
+  // filesystem
+  // flakes
+  // lists
+  // meta
+  // numeric
+  // paths
+  // prelude
+  // reflect
+  // sets
+  // strings;
+
+  lib = {
+    lib = final;
+    inherit
+      dag
+      debug
+      derivations
+      fetchers
+      filesystem
+      flakes
+      lists
+      meta
+      numeric
+      paths
+      prelude
+      reflect
+      sets
+      strings
+      ;
+  }
+  // primops;
 in
-{
-  inherit
-    attrs
-    dag
-    debug
-    derivations
-    fetchers
-    filesystem
-    flakes
-    lists
-    meta
-    numeric
-    paths
-    prelude
-    reflect
-    strings
-    ;
-}
-// primops
+lib

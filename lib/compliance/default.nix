@@ -1,5 +1,6 @@
 final: prev:
 let
+  inherit (final.attrs) mapValues genAttrs pair;
   inherit (final.debug) throw;
   inherit (final.filesystem) importJson;
   inherit (final.strings) joinSep;
@@ -10,6 +11,7 @@ let
     boolAnd
     boolOr
     typeOf
+    flip
     ;
 
   inherit (final.compliance)
@@ -19,12 +21,15 @@ let
     getSpdx
     isSpdx
     licenses
+    spdxOr
+    licensesOrLater
     spdxCompose
     spdxComposeList
     spdxLicenseComposer
     ;
 in
 {
+  # --- SPDX lists ------------------------------------------------------------
   inherit (importJson ./spdx.json) spdxVersion spdxDate;
 
   licenses = importJson ./licenses.json;
@@ -35,14 +40,15 @@ in
   getSpdx =
     set: selfName: x:
     if isString x then
-      set.${x} or (throw "licenses.${selfName}: unknown spdx ${x}")
+      set.${x} or (throw "compliance.${selfName}: unknown spdx ${x}")
     else
-      assert isSpdx x || throw "licenses.${selfName}: spdx or id are expected but got ${typeOf x}";
+      assert isSpdx x || throw "compliance.${selfName}: spdx or id are expected but got ${typeOf x}";
       x;
 
   getLicense = getSpdx licenses "getLicense";
   getException = getSpdx exceptions "getException";
 
+  # --- SPDX Combinators ------------------------------------------------------
   spdxCompose =
     getA: getB: join: comparator: a: b:
     let
@@ -79,4 +85,27 @@ in
 
   spdxAll = spdxComposeList (xs: "(${joinSep " and " xs})") <| all id;
   spdxAny = spdxComposeList (xs: "(${joinSep " or " xs})") <| any id;
+
+  # --- SPDX plus -------------------------------------------------------------
+  spdxPlus = x: licensesOrLater.${(getLicense x).id};
+
+  licensesOrLater =
+    let
+      gnu = [
+        "GPL-1.0"
+        "GPL-2.0"
+        "GPL-3.0"
+        "LGPL-2.0"
+        "LGPL-2.1"
+        "LGPL-3.0"
+        "AGPL-1.0"
+        "AGPL-3.0"
+        "GFDL-1.1"
+        "GFDL-1.2"
+        "GFDL-1.3"
+      ];
+    in
+    genAttrs (id: id + "-or-later" |> getLicense |> pair id) gnu
+    // genAttrs (flip pair getLicense) (map (id: id + "-or-later") gnu)
+    // genAttrs (id: id + "-or-later" |> getLicense |> pair (id + "-only")) gnu;
 }
