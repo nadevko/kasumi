@@ -8,7 +8,6 @@ let
     names = prev.attrNames;
     ofPairs = prev.listToAttrs;
     omit = names: set: prev.removeAttrs set names;
-    pluck = prev.catAttrs;
     values = prev.attrValues;
     zipBy = prev.zipAttrsWith;
   };
@@ -88,6 +87,7 @@ let
     elem = xs: x: prev.elem x xs;
     foldL' = prev.foldl';
     generate = prev.genList;
+    pluck = prev.catAttrs;
     size = prev.length;
     sortBy = prev.sort;
     where = prev.filter;

@@ -3,42 +3,42 @@
 
 BASE_DIR="${1:-$PWD/lib/compliance}"
 
-SPDX="$BASE_DIR/spdx.json"
-L_SPDX="$BASE_DIR/licenses.spdx.json"
-E_SPDX="$BASE_DIR/exceptions.spdx.json"
+L_SPDX=$(mktemp /tmp/licenses.spdx.XXXXXX.json)
+E_SPDX=$(mktemp /tmp/exceptions.spdx.XXXXXX.json)
+trap "rm $L_SPDX $E_SPDX" EXIT
 
-L_NIX="$BASE_DIR/licenses.nix.json"
-E_NIX="$BASE_DIR/exceptions.nix.json"
+curl -sL https://spdx.org/licenses/licenses.json  -o "$L_SPDX"
+curl -sL https://spdx.org/licenses/exceptions.json -o "$E_SPDX"
 
-L="$BASE_DIR/licenses.json"
-E="$BASE_DIR/exceptions.json"
+jq '{ spdxVersion: .licenseListVersion, spdxDate: .releaseDate }' "$L_SPDX" \
+  > "$BASE_DIR/spdx.json"
 
-[[ ! -e $L_SPDX ]] && curl -L https://spdx.org/licenses/licenses.json -o "$L_SPDX"
-[[ ! -e $E_SPDX ]] && curl -L https://spdx.org/licenses/exceptions.json -o "$E_SPDX"
-
-jq '{
-  spdxVersion: .licenseListVersion,
-  spdxDate: .releaseDate
-}' "$L_SPDX" > "$SPDX"
-
-jq -Sc --slurpfile nix "$L_NIX" '
-  .licenses | reduce .[] as $l ({}; 
-    . + { ($l.licenseId): (
-    {name: $l.name}
-    | . + (if $l.isOsiApproved == false then {osiApproved: false} else {} end)
-    | . + (if $l.isFsfLibre == false then {fsfLibre: false} else {} end)
-    | . + (if $l.isDeprecatedLicenseId == true then {deprecated: true} else {} end)
-    * ($nix[0].licenses[$l.licenseId] // {})) }
+jq -Scn \
+  --slurpfile l  "$L_SPDX" \
+  --slurpfile e  "$E_SPDX" \
+  --slurpfile lo "$BASE_DIR/licenses.overrides.json" \
+  --slurpfile eo "$BASE_DIR/exceptions.overrides.json" '
+  def norm(d): with_entries(
+    (.value.nixFree // .value.osiApproved // .value.fsfLibre // d) as $nf |
+    .value =
+    { id: .key
+    , type: "spdx"
+    , osiApproved: (.value.osiApproved // d)
+    , fsfLibre: (.value.fsfLibre // d)
+    , nixFree: $nf
+    , nixRedistributable: (.value.nixRedistributable // $nf)
+    });
+  (INDEX($l[0].licenses[]; .licenseId)
+  | map_values(
+    { osiApproved: .isOsiApproved
+    , fsfLibre: .isFsfLibre
+    , nixRedistributable: (.isOsiApproved or .isFsfLibre) })
+  * $lo[0] | norm(false)
+  ),
+  ( INDEX($e[0].exceptions[]; .licenseExceptionId) | map_values({})
+  * $eo[0] | norm(true)
   )
-' "$L_SPDX" > "$L"
-
-jq -Sc --slurpfile nix "$E_NIX" '
-  .exceptions | reduce .[] as $e ({};
-    . + { ($e.licenseExceptionId): (
-    {name: $e.name}
-    | . + (if $e.isDeprecatedLicenseId == true then {deprecated: true} else {} end)
-    * ($nix[0].exceptions[$e.licenseExceptionId] // {})) }
-  )
-' "$E_SPDX" > "$E"
-
-rm "$L_SPDX" "$E_SPDX"
+' | { read l; read e
+      echo "$l" > "$BASE_DIR/licenses.json"
+      echo "$e" > "$BASE_DIR/exceptions.json"
+    }

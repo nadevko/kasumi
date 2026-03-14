@@ -1,0 +1,55 @@
+{
+  "LicenseRef-Generic-Free-Redist": {
+    "nixFree": true
+  },
+  "LicenseRef-Generic-Unfree-Non-Redist": {
+    "nixFree": false
+  },
+  "LicenseRef-Generic-Free-Non-Redist": {
+    "nixFree": true,
+    "nixRedistributable": false
+  },
+  "LicenseRef-Generic-Unfree-Redist": {
+    "nixFree": false,
+    "nixRedistributable": true
+  },
+  "BitTorrent-1.0": {
+    "nixRedistributable": true
+  },
+  "BitTorrent-1.1": {
+    "nixRedistributable": true
+  },
+  "BSD-4-Clause-UC": {
+    "nixRedistributable": true
+  },
+  "BSD-4-Clause": {
+    "nixRedistributable": true
+  },
+  "BUSL-1.1": {
+    "nixRedistributable": true
+  },
+  "CC0-1.0": {
+    "nixRedistributable": true
+  },
+  "FSL-1.1-ALv2": {
+    "nixRedistributable": true
+  },
+  "FSL-1.1-MIT": {
+    "nixRedistributable": true
+  },
+  "SSLeay-standalone": {
+    "nixRedistributable": true
+  },
+  "SSPL-1.0": {
+    "nixRedistributable": true
+  },
+  "Watcom-1.0": {
+    "nixRedistributable": true
+  },
+  "WTFPL": {
+    "nixRedistributable": true
+  },
+  "zlib-acknowledgement": {
+    "nixRedistributable": true
+  }
+}
