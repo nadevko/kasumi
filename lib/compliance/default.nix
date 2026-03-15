@@ -1,109 +1,171 @@
 final: prev:
 let
-  inherit (final.sets) assocBy assocNames pair;
   inherit (final.debug) throw;
   inherit (final.filesystem) importJson;
   inherit (final.strings) joinSep;
-  inherit (final.lists) all any pluck;
+  inherit (final.lists)
+    all
+    any
+    pluck
+    concatMap
+    ;
   inherit (final.prelude)
     id
     isString
-    land
-    lor
     typeOf
+    null
+    true
     ;
+  inherit (final.sets) assocNames;
 
   inherit (final.compliance)
     bySpdx
     getSpdx
-    isSpdx
-    licensesOrLater
-    spdxCompose
-    spdxComposeList
+    getSpdxWith
+    spdxAll
     spdxAnd
+    spdxAny
+    spdxFields
+    spdxFold
     spdxOr
+    spdxPlus
+    spdxPrios
     spdxWith
+    toSpdxExpr
     ;
 in
 {
-  # --- SPDX lists ------------------------------------------------------------
+  # --- SPDX ------------------------------------------------------------------
   inherit (importJson ./by-spdx.json) bySpdx spdxVersion spdxDate;
+  spdxFields = [
+    "exception"
+    "osiApproved"
+    "fsfLibre"
+    "nixFree"
+    "nixRedistributable"
+  ];
+  spdxPrios = {
+    " OR " = 1;
+    " AND " = 2;
+    " WITH " = 3;
+  };
 
-  isSpdx = x: x ? type && (x.type == "license" || x.type == "exception");
+  getSpdx = getSpdxWith bySpdx;
+  getSpdxWith =
+    bySpdx: n:
+    let
+      x =
+        if isString n then
+          bySpdx.${n} or (throw "compliance.getSpdx: unknown SPDX '${n}'")
+        else
+          assert
+            x ? type && x.type == "spdx"
+            || throw "compliance.getSpdx: 'string' or 'spdx' are expected but got '${typeOf n}'";
+          n;
+    in
+    if x ? __toString then x else x // { __toString = toSpdxExpr; };
 
-  getSpdx =
-    n:
-    if isString n then
-      bySpdx.${n} or (throw "compliance.getSpdx: unknown spdx '${n}'")
+  toSpdxExpr =
+    spdx:
+    if spdx ? sep then
+      joinSep spdx.sep
+      <| map (
+        x:
+        let
+          expr = toSpdxExpr x;
+        in
+        if (spdxPrios.${x.sep} or 3) < spdxPrios.${spdx.sep} then "(${expr})" else expr
+      ) spdx.args
     else
-      assert isSpdx n || throw "compliance.getSpdx: spdx or name are expected but got '${typeOf n}'";
-      n;
-  
+      spdx.id;
+
   spdx = {
-    __findFile = _: getSpdx;
+    __nixPath = bySpdx;
+    __findFile = getSpdxWith;
     __mul = spdxAnd;
-    __lessThan = spdxOr;
+    __sub = a: b: if a == 0 then spdxPlus b else spdxOr a b;
     __div = spdxWith;
-    # __sub = spdxPlus;
   };
 
   # --- SPDX Combinators ------------------------------------------------------
-  spdxCompose =
-    join: comparator: a: b:
+  spdxFold =
+    sep: comparator: xs:
+    let
+      xs' = concatMap (
+        x:
+        let
+          x' = getSpdx x;
+        in
+        if x' ? sep && x'.sep == sep then x'.args else [ x' ]
+      ) xs;
+    in
+    assert
+      all (x: !x.exception) xs' || throw "compliance.spdxFold: exceptions cannot be combined with AND/OR";
+    {
+      type = "spdx";
+      inherit sep;
+      args = xs';
+      __toString = toSpdxExpr;
+    }
+    // assocNames (field: comparator <| pluck field xs') spdxFields;
+
+  spdxAll = spdxFold " AND " <| all id;
+  spdxAny = spdxFold " OR " <| any id;
+  spdxAnd =
+    a: b:
+    spdxAll [
+      a
+      b
+    ];
+  spdxOr =
+    a: b:
+    spdxAny [
+      a
+      b
+    ];
+
+  spdxWith =
+    a: b:
     let
       a' = getSpdx a;
       b' = getSpdx b;
     in
+    assert
+      !a' ? sep && !a'.exception || throw "compliance.spdxWith: left operand must be a plain license";
+    assert !b' ? sep && b'.exception || throw "compliance.spdxWith: right operand must be an exception";
     {
-      type = "license";
-      name = join a'.name b'.name;
-      osiApproved = comparator a'.osiApproved b'.osiApproved;
-      fsfLibre = comparator a'.fsfLibre b'.fsfLibre;
-      nixFree = comparator a'.nixFree b'.nixFree;
-      nixRedistributable = comparator a'.nixRedistributable b'.nixRedistributable;
-    };
-
-  spdxAnd = spdxCompose (a: b: "(${a} and ${b})") land;
-  spdxWith = spdxCompose (a: b: "(${a} with ${b})") land;
-  spdxOr = spdxCompose (a: b: "(${a} or ${b})") lor;
-
-  spdxComposeList =
-    joinId: comparator: xs:
-    let
-      xs' = map getSpdx xs;
-    in
-    {
-      type = "license";
-      name = joinId <| pluck "name" xs';
-      osiApproved = comparator <| pluck "osiApproved" xs';
-      fsfLibre = comparator <| pluck "fsfLibre" xs';
-      nixFree = comparator <| pluck "nixFree" xs';
-      nixRedistributable = comparator <| pluck "nixRedistributable" xs';
-    };
-
-  spdxAll = spdxComposeList (xs: "(${joinSep " and " xs})") <| all id;
-  spdxAny = spdxComposeList (xs: "(${joinSep " or " xs})") <| any id;
-
-  # --- SPDX plus -------------------------------------------------------------
-  spdxPlus = x: licensesOrLater.${(getSpdx x).name};
-
-  licensesOrLater =
-    let
-      gnu = [
-        "GPL-1.0"
-        "GPL-2.0"
-        "GPL-3.0"
-        "LGPL-2.0"
-        "LGPL-2.1"
-        "LGPL-3.0"
-        "AGPL-1.0"
-        "AGPL-3.0"
-        "GFDL-1.1"
-        "GFDL-1.2"
-        "GFDL-1.3"
+      type = "spdx";
+      sep = " WITH ";
+      args = [
+        a'
+        b'
       ];
+      __toString = toSpdxExpr;
+    }
+    // assocNames (
+      field:
+      all id
+      <| pluck field [
+        a'
+        b'
+      ]
+    ) spdxFields;
+
+  spdxPlus =
+    x:
+    let
+      x' = getSpdx x;
     in
-    assocNames (n: getSpdx <| n + "-or-later") gnu
-    // assocNames getSpdx (map (n: n + "-or-later") gnu)
-    // assocBy (n: n + "-or-later" |> getSpdx |> pair (n + "-only")) gnu;
+    assert
+      !(x' ? sep) && !(x' ? plus) || throw "compliance.spdxPlus: cannot apply + to a compound expression";
+    assert
+      x' ? later || throw "compliance.spdxPlus: ${x'.id} is not a versioned license, + is meaningless";
+    assert
+      x'.later != null
+      || throw "compliance.spdxPlus: ${x'.id} is a GNU license, use -only or -or-later suffix explicitly";
+    spdxAny (map getSpdx x'.later)
+    // {
+      plus = true;
+      __toString = _: x'.id + "+";
+    };
 }

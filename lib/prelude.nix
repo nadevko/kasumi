@@ -93,7 +93,7 @@ prev.prelude or { }
   pipe = foldl' applyTo;
   pipeTo = flip pipe;
 
-  tryAttr = name: set: set ? ${name};
+  tryHas = name: set: set ? ${name};
   getWith =
     default: name: set:
     set.${name} or default;

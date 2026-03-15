@@ -9,7 +9,7 @@ let
     take
     drop
     at
-    size
+    sizeOf
     filter
     generate
     sublist
@@ -26,23 +26,23 @@ in
 
   # --- getters ---------------------------------------------------------------
   take = sublist 0;
-  takeR = n: xs: drop (max 0 (size xs - n)) xs;
-  drop = n: xs: sublist n (size xs) xs;
-  dropR = n: xs: take (max 0 (size xs - n)) xs;
+  takeR = n: xs: drop (max 0 (sizeOf xs - n)) xs;
+  drop = n: xs: sublist n (sizeOf xs) xs;
+  dropR = n: xs: take (max 0 (sizeOf xs - n)) xs;
 
-  last =
+  lastOf =
     xs:
-    assert xs != [ ] || "kasumi.lists.last: list must not be empty!";
-    at xs (size xs - 1);
+    assert xs != [ ] || "kasumi.lists.lastOf: list must not be empty!";
+    at (sizeOf xs - 1) xs;
 
   init =
     xs:
     assert xs != [ ] || "kasumi.lists.init: list must not be empty!";
-    take (size xs - 1) xs;
+    take (sizeOf xs - 1) xs;
 
   sublist =
     start: count: xs:
-    size xs - start |> clamp 0 count |> generate (i: at xs <| i + start);
+    sizeOf xs - start |> clamp 0 count |> generate (i: at xs <| i + start);
 
   # --- generators ------------------------------------------------------------
   replicate = n: x: generate (_: x) n;
@@ -63,14 +63,14 @@ in
   reverse =
     xs:
     let
-      len = size xs;
+      len = sizeOf xs;
     in
     generate (i: at xs (len - i - 1)) len;
 
   # --- maps ------------------------------------------------------------------
   for = flip map;
-  imap0 = f: xs: generate (i: f i <| at xs i) <| size xs;
-  imap1 = f: xs: generate (i: f (i + 1) <| at xs i) <| size xs;
+  imap0 = f: xs: generate (i: f i <| at xs i) <| sizeOf xs;
+  imap1 = f: xs: generate (i: f (i + 1) <| at xs i) <| sizeOf xs;
 
   # --- folds -----------------------------------------------------------------
   fold =
@@ -78,12 +78,12 @@ in
     let
       folder = n: if n == -1 then nil else f (folder <| n - 1) <| at xs n;
     in
-    folder <| size xs - 1;
+    folder <| sizeOf xs - 1;
 
   foldR =
     f: nil: xs:
     let
-      len = size xs;
+      len = sizeOf xs;
       folder = n: if n == len then nil else n + 1 |> folder |> f (at xs n);
     in
     folder 0;
@@ -91,7 +91,7 @@ in
   dfold =
     transform: getInitial: getFinal: xs:
     let
-      len = size xs;
+      len = sizeOf xs;
       linkStage =
         previousStage: idx:
         if idx == len then
@@ -115,7 +115,7 @@ in
   splitAt =
     i: xs:
     let
-      len = size xs;
+      len = sizeOf xs;
       safeIdx = clamp 0 len (if i < 0 then len + i else i);
     in
     {
