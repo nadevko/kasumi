@@ -13,11 +13,13 @@ let
   inherit (final.prelude) flip withDefault;
 
   inherit (final.numeric)
-    toIntBase
-    toBaseDigits
+    bnot
+    bor
     max
     min
     sub
+    toBaseDigits
+    toIntBase
     ;
 in
 {
@@ -50,7 +52,8 @@ in
 
   # --- extremes --------------------------------------------------------------
 
-  bitNot = sub (-1);
+  bnot = sub (-1);
+  bimp = a: b: bor (bnot a) b;
 
   toIntBase =
     base: alphabet: i:

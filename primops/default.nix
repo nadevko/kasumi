@@ -1,8 +1,5 @@
-{
-  lib ? import ../compat { },
-  ...
+{ lib ? import ../compat { }
+, ...
 }:
-let
-  self = import ./overlay.nix self lib;
-in
+let self = import ./overlay.nix self lib; in
 self

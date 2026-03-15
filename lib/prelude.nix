@@ -60,11 +60,11 @@ in
   eq = a: b: a == b;
   neq = a: b: a != b;
 
-  boolNot = x: !x;
-  boolOr = a: b: a || b;
-  boolAnd = a: b: a && b;
-  boolXor = a: b: (!a) != (!b);
-  boolImply = a: b: a -> b;
+  lnot = x: !x;
+  lor = a: b: a || b;
+  land = a: b: a && b;
+  lxor = a: b: (!a) != (!b);
+  limp = a: b: a -> b;
 
   attr = name: set: set ? ${name};
   getWith =
