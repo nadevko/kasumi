@@ -59,7 +59,7 @@ in
           bySpdx.${n} or (throw "compliance.getSpdx: unknown SPDX '${n}'")
         else
           assert
-            x ? type && x.type == "spdx"
+            n ? type && n.type == "spdx"
             || throw "compliance.getSpdx: 'string' or 'spdx' are expected but got '${typeOf n}'";
           n;
     in
