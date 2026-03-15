@@ -11,9 +11,9 @@ let
         throw
         trace
         warn
-    ; annotateError = prev.addErrorContext
     ; deepTrace = prev.traceVerbose
     ; dump = prev.toXML
+    ; explainError = prev.addErrorContext
     ; } ;
 
   derivations =
@@ -30,9 +30,9 @@ let
 
   fetchers =
     { inherit (prev) fetchGit fetchMercurial fetchTarball
-    ; fetchRef = prev.fetchTree
     ; fetchStore = prev.fetchClosure
     ; fetchUrl = prev.fetchurl
+    ; fetchWith = prev.fetchTree
     ; } ;
 
   filesystem =
@@ -46,7 +46,7 @@ let
     ; } ;
 
   flakes =
-    { fetchFlake = prev.getFlake
+    { importFlake = prev.getFlake
     ; fromRef = prev.parseFlakeRef
     ; toRef = prev.flakeRefToString
     ; } ;
@@ -56,18 +56,18 @@ let
         all
         any
         concatMap
-        head
+        foldl'
         map
         partition
-        tail
     ; at = i: xs: prev.elemAt xs i
     ; concatAll = prev.concatLists
-    ; elem = xs: x: prev.elem x xs
-    ; foldLeft' = prev.foldl'
+    ; contains = xs: x: prev.elem x xs
     ; generate = prev.genList
+    ; headOf = prev.head
     ; pluck = prev.catAttrs
-    ; size = prev.length
+    ; sizeOf = prev.length
     ; sortBy = prev.sort
+    ; tailOf = prev.tail
     ; where = prev.filter
     ; } ;
 
@@ -111,7 +111,6 @@ let
         null
         true
         typeOf
-    ; inherit primops
     ; importWith = prev.scopedImport
     ; isLambda = prev.isFunction
     ; isSet = prev.isAttrs
@@ -125,17 +124,17 @@ let
         langVersion
         nixPath
         nixVersion
-    ; _getAttrPos = prev.unsafeGetAttrPos
-    ; lambdaArgsOf = prev.functionArgs
+    ; _attrPosOf = prev.unsafeGetAttrPos
+    ; getLambdaArgs = prev.functionArgs
     ; try = prev.tryEval
     ; } ;
 
   sets =
-    { attr = prev.hasAttr
-    ; get = prev.getAttr
+    { get = prev.getAttr
     ; groupMap = prev.zipAttrsWith
     ; groupWhere = prev.groupBy
-    ; intersectRight = prev.intersectAttrs
+    ; has = prev.hasAttr
+    ; intersectr = prev.intersectAttrs
     ; mapValues = prev.mapAttrs
     ; namesOf = prev.attrNames
     ; ofPairs = prev.listToAttrs
@@ -147,14 +146,14 @@ let
     { inherit (prev)
         convertHash
         hashString
-        match
-        split
         toString
     ; fromJson = prev.fromJSON
     ; fromToml = prev.fromTOML
     ; joinSep = prev.concatStringsSep
-    ; length = prev.stringLength
+    ; lengthOf = prev.stringLength
+    ; matches = prev.match
     ; replaceAll = prev.replaceStrings
+    ; splits = prev.split
     ; substr = prev.substring
     ; toJson = prev.toJSON
     ; } ;

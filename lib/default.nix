@@ -9,7 +9,7 @@ let
         self = import ./overlay.nix self lib;
       in
       self
-    ).attrs.pointwiseL
+    ).sets.pointwiseL
       lib
       (import ./overlay.nix self lib);
 in

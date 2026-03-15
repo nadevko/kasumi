@@ -4,19 +4,20 @@ let
 
   inherit (final.prelude)
     bind
-    fapply
-    fixWith
+    converge
+    applyTo
+    fixAs
     flip
     import
     isFunction
-    isFunctionLike
     isFunctor
+    isInterpolish
+    isLambda
     isList
     isPath
-    isPathLike
+    isPathish
     isString
-    isStringAble
-    isStringLike
+    isStringable
     null
     pipe
     typeOf
@@ -28,9 +29,6 @@ in
   const = x: _: x;
   snd = _: y: y;
 
-  apply = f: x: f x;
-  fapply = x: f: f x;
-
   flip =
     f: x: y:
     f y x;
@@ -40,12 +38,9 @@ in
   on =
     f: g: x: y:
     f (g x) (g y);
-  converge =
+  lift2 =
     f: g: h: x:
     f (g x) (h x);
-
-  pipe = foldl' fapply;
-  fpipe = flip pipe;
 
   ifElse =
     pred: f: g: x:
@@ -54,9 +49,30 @@ in
     yes: no: cond:
     if cond then yes else no;
 
+  # --- fixpoints -------------------------------------------------------------
+  fixAs =
+    name: rset:
+    let
+      self = rset self // {
+        ${name} = rset;
+      };
+    in
+    self;
+
+  fix = fixAs null;
+  fixate = fixAs "_rset";
+
+  converge =
+    f: x:
+    let
+      x' = f x;
+    in
+    if x' == x then x else converge f x';
+
   # --- language operators ----------------------------------------------------
   update = a: b: a // b;
   concat = a: b: a ++ b;
+  append = a: b: a + b;
   eq = a: b: a == b;
   neq = a: b: a != b;
 
@@ -66,14 +82,20 @@ in
   lxor = a: b: (!a) != (!b);
   limp = a: b: a -> b;
 
-  attr = name: set: set ? ${name};
+  apply = f: x: f x;
+  applyTo = x: f: f x;
+
+  pipe = foldl' applyTo;
+  pipeTo = flip pipe;
+
+  tryAttr = name: set: set ? ${name};
   getWith =
     default: name: set:
     set.${name} or default;
 
   # --- optionals -------------------------------------------------------------
   bind = f: maybe: if maybe == null then null else f maybe;
-  do = foldl' (flip bind);
+  do = foldl' <| flip bind;
   withDefault = default: maybe: if maybe == null then default else maybe;
   alt =
     f: y: x:
@@ -83,46 +105,28 @@ in
     if x' == null then f y else x';
 
   # --- type predicates -------------------------------------------------------
-  isPathLike = x: isPath x || x ? outPath;
+  isPathish = x: isPath x || x ? outPath;
 
-  isFunctionLike = f: isFunction f || isFunctor f;
+  isFunction = f: isLambda f || isFunctor f;
   isFunctor = f: f ? __functor;
 
-  isStringLike = x: isString x || isPathLike x || x ? __toString;
-  isStringAble =
+  isInterpolish = x: isString x || isPathish x || x ? __toString;
+  isStringable =
     x:
-    isStringLike x
-    || isList x && all isStringAble x
-    || elem (typeOf x) [
-      "null"
-      "int"
-      "float"
-      "bool"
-    ];
+    isInterpolish x
+    || elem [ "null" "int" "float" "bool" ] (typeOf x)
+    || isList x && all isStringable x;
 
   # --- coercion --------------------------------------------------------------
-  invoke = f: if isFunctionLike f then f else import f;
-  toFunctionLike = f: if isFunctionLike f then f else _: f;
+  invoke = f: if isFunction f then f else import f;
+  toFunction = f: if isFunction f then f else _: f;
   toFunctor = f: if isFunctor f then f else { __functor = _: f; };
-  toFunction =
+  toLambda =
     f:
-    if isFunction f then
+    if isLambda f then
       f
     else if isFunctor f then
       f f
     else
       _: f;
-
-  # --- fixpoints -------------------------------------------------------------
-  fixWith =
-    name: rattrs:
-    let
-      self = rattrs self // {
-        ${name} = rattrs;
-      };
-    in
-    self;
-
-  fix = fixWith null;
-  fixate = fixWith "rattrs";
 }
