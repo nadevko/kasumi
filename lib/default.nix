@@ -1,16 +1,9 @@
 {
-  lib ? import ../primops { },
+  primops ? import ../primops { },
   ...
 }:
 let
-  self =
-    (
-      let
-        self = import ./overlay.nix self lib;
-      in
-      self
-    ).sets.pointwiseL
-      lib
-      (import ./overlay.nix self lib);
+  lib = import ./overlay.nix lib primops;
+  self = lib.sets.pointwisel primops <| import ./overlay.nix self primops;
 in
 self

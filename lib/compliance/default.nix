@@ -1,6 +1,6 @@
 final: prev:
 let
-  inherit (final.attrs) mapValues genAttrs pair;
+  inherit (final.attrs) genAttrs pair;
   inherit (final.debug) throw;
   inherit (final.filesystem) importJson;
   inherit (final.strings) joinSep;
@@ -21,7 +21,6 @@ let
     getSpdx
     isSpdx
     licenses
-    spdxOr
     licensesOrLater
     spdxCompose
     spdxComposeList

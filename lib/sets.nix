@@ -1,89 +1,121 @@
 final: prev:
 let
-  inherit (builtins)
+  inherit (final.prelude)
+    isSet
+    compose
+    id
+    snd
+    ;
+  inherit (final.lists)
+    singleton
     concatMap
-    isAttrs
-    zipAttrsWith
-    listToAttrs
-    mapAttrs
-    attrNames
-    intersectAttrs
     head
     tail
-    attrValues
+    map
     ;
-
-  inherit (final.lists) singleton;
-  inherit (final.trivial) compose id snd;
 
   inherit (final.sets)
+    assocNames
+    assocPairs
     attr
+    bindSets
+    foldPathBy
+    genAttrs
+    genSetBy
+    genTransposedAttrsBy
+    groupMap
+    intersectr
+    listMap
+    mapValues
+    mergeAttrs
+    namesOf
     pair
-    bindAttrs
+    pluck
     singletonPair
     transposeAttrs
-    genAttrsBy
-    genTransposedAttrsBy
-    foldPathWith
-    genAttrs
-    mapAttrsToList
-    mergeAttrsList
+    valuesOf
     ;
 in
-prev.attrs or { }
-// {
+{
+  # --- primitives ------------------------------------------------------------
   attr = n: v: { ${n} = v; };
   singletonAttr = n: v: singleton <| attr n v;
+
   pair = name: value: { inherit name value; };
   singletonPair = n: v: singleton <| pair n v;
-  mapValues = f: set: attrValues <| mapAttrs f set;
-  swap = x: pair x.value x.name;
+  swap = p: pair p.value p.name;
 
-  bindAttrs = f: set: concatMap (n: f n set.${n}) <| attrNames set;
-  mbindAttrs = f: set: listToAttrs <| bindAttrs f set;
+  # -- associations -----------------------------------------------------------
+  assocBy = f: xs: assocPairs <| map f xs;
+  assocNames = f: ns: assocPairs <| map (n: pair n <| f n) ns;
+  assocValues = f: vs: assocPairs <| map (v: pair (f v) v) vs;
+  assocAttrs = f: x: assocPairs <| listMap f x;
 
-  mergeMapAttrs = f: set: attrNames set |> map (n: f n set.${n}) |> mergeAttrsList;
+  # --- grouping --------------------------------------------------------------
+  groupOf = groupMap snd;
+  groupMapOnly =
+    ns: f: sets:
+    assocPairs <| map (n: pluck n sets |> f n |> pair n) ns;
 
-  intersectWith =
-    f: left: right:
-    mapAttrs (n: f n left.${n}) <| intersectAttrs left right;
+  # --- lists -----------------------------------------------------------------
+  listPairs = listMap pair;
+  listMap = f: set: valuesOf <| mapValues f set;
+  listOnly = ns: set: map (n: set.${n}) ns;
 
-  partitionAttrs = pred: set: {
-    right = bindAttrs (n: v: if pred n v then singletonPair n v else [ ]) set;
-    wrong = bindAttrs (n: v: if !pred n v then singletonPair n v else [ ]) set;
-  };
-
-  pointwiseL =
+  # --- updaters --------------------------------------------------------------
+  pointwisel =
     base: augment:
     base
-    // mapAttrs (
-      n: v: if isAttrs v && isAttrs (base.${n} or null) then v // base.${n} else base.${n} or v
+    // mapValues (
+      n: v: if isSet v && isSet (base.${n} or null) then v // base.${n} else base.${n} or v
     ) augment;
 
-  pointwiseR =
+  pointwiser =
     base: override:
     base
-    // mapAttrs (n: v: if isAttrs v && isAttrs (base.${n} or null) then base.${n} // v else v) override;
+    // mapValues (n: v: if isSet v && isSet (base.${n} or null) then base.${n} // v else v) override;
 
-  transposeAttrs =
-    set: zipAttrsWith (_: listToAttrs) <| mapAttrsToList (root: mapAttrs (_: pair root)) set;
+  # --- set -> list -----------------------------------------------------------
 
-  genAttrsBy =
+  # idk
+  mergeMap = f: set: namesOf set |> map (n: f n set.${n}) |> mergeAttrs;
+  bindSets = f: set: concatMap (n: f n set.${n}) <| namesOf set;
+  mbindSets = f: set: assocPairs <| bindSets f set;
+
+  # --- intersections ---------------------------------------------------------
+  intersectWith =
+    f: left: right:
+    mapValues (n: f n left.${n}) <| intersectr left right;
+
+  partitionSets = pred: set: {
+    right = bindSets (n: v: if pred n v then singletonPair n v else [ ]) set;
+    wrong = bindSets (n: v: if !pred n v then singletonPair n v else [ ]) set;
+  };
+
+  # --- transforms ------------------------------------------------------------
+  transposeSet = set: groupMap (_: assocPairs) <| listMap (root: mapValues (_: pair root)) set;
+
+  # --- generators ------------------------------------------------------------
+  genSetBy =
     adapter: roots: generator:
     genAttrs roots <| compose generator adapter;
 
   genTransposedAttrsBy =
     adapter: roots: generator:
-    transposeAttrs <| genAttrsBy adapter roots generator;
+    transposeAttrs <| genSetBy adapter roots generator;
 
   genTransposedAttrs = genTransposedAttrsBy id;
 
-  foldPathWith =
+  # --- getters ---------------------------------------------------------------
+  pick = ns: set: assocNames (n: set.${n}) ns;
+
+  # --- selections ------------------------------------------------------------
+  foldPathBy =
     f: default: pattern:
     let
       recurse =
         deepest: nodesPath: set:
-        if isAttrs set -> nodesPath == [ ] then
+        if isSet set -> nodesPath == [ ] then
           deepest
         else
           let
@@ -94,5 +126,5 @@ prev.attrs or { }
     in
     recurse default;
 
-  foldPath = foldPathWith snd;
+  foldPath = foldPathBy snd;
 }

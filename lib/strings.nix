@@ -53,8 +53,7 @@ let
     match
     ;
 in
-prev.strings or { }
-// {
+{
   # --- joins -----------------------------------------------------------------
   join = joinSep "";
   joinLines = xs: joinSep "\n" xs + "\n";

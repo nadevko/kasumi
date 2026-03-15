@@ -19,13 +19,10 @@ let
     singleton
     ;
 in
-prev.lists or { }
-// {
+{
   # --- trivial ---------------------------------------------------------------
   singleton = x: [ x ];
   toList = x: if isList x then x else [ x ];
-  optional = cond: x: if cond then [ x ] else [ ];
-  optionals = cond: xs: if cond then xs else [ ];
 
   # --- getters ---------------------------------------------------------------
   take = sublist 0;

@@ -33,8 +33,7 @@ let
     idVersion
     ;
 in
-prev.meta or { }
-// {
+{
   # --- derivation name -------------------------------------------------------
   idPname = x: (fromDrvName x).name;
   idVersion = x: (fromDrvName x).version;

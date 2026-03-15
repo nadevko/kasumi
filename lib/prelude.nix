@@ -1,11 +1,12 @@
 final: prev:
 let
-  inherit (final.lists) foldl' elem all;
+  inherit (final.lists) foldl' contains all;
 
   inherit (final.prelude)
+    applyTo
     bind
     converge
-    applyTo
+    ensure
     fixAs
     flip
     import
@@ -47,6 +48,9 @@ in
     if pred x then f x else g x;
   boolAs =
     yes: no: cond:
+    if cond then yes else no;
+  ensure =
+    no: yes: cond:
     if cond then yes else no;
 
   # --- fixpoints -------------------------------------------------------------
@@ -104,6 +108,11 @@ in
     in
     if x' == null then f y else x';
 
+  # --- ensures ---------------------------------------------------------------
+  ensureSet = ensure { };
+  ensureSingleton = yes: ensure [ ] [ yes ];
+  ensureList = ensure [ ];
+
   # --- type predicates -------------------------------------------------------
   isPathish = x: isPath x || x ? outPath;
 
@@ -114,7 +123,7 @@ in
   isStringable =
     x:
     isInterpolish x
-    || elem [ "null" "int" "float" "bool" ] (typeOf x)
+    || contains [ "null" "int" "float" "bool" ] (typeOf x)
     || isList x && all isStringable x;
 
   # --- coercion --------------------------------------------------------------

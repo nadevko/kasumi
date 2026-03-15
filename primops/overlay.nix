@@ -130,14 +130,14 @@ let
     ; } ;
 
   sets =
-    { get = prev.getAttr
+    { assocPairs = prev.listToAttrs
+    ; get = prev.getAttr
     ; groupMap = prev.zipAttrsWith
     ; groupWhere = prev.groupBy
     ; has = prev.hasAttr
     ; intersectr = prev.intersectAttrs
     ; mapValues = prev.mapAttrs
     ; namesOf = prev.attrNames
-    ; ofPairs = prev.listToAttrs
     ; omit = names: set: prev.removeAttrs set names
     ; valuesOf = prev.attrValues
     ; } ;

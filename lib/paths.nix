@@ -20,8 +20,7 @@ let
     dirname
     ;
 in
-prev.paths or { }
-// {
+{
   stemOf =
     n:
     let

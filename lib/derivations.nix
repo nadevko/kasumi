@@ -4,12 +4,11 @@ let
 
   inherit (final.derivations) isDerivation;
 in
-prev.derivations or { }
-// {
+{
   # --- context manipulations -------------------------------------------------
   cloneContext = src: target: slice 0 0 src + target;
 
-  # --- checks ----------------------------------------------------------------
+  # --- types -----------------------------------------------------------------
   isDerivation = v: v.type or null == "derivation";
 
   isSupportedDerivation =
