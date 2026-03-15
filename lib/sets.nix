@@ -36,7 +36,8 @@ let
     valuesOf
     ;
 in
-{
+prev.sets or { }
+// {
   # --- primitives ------------------------------------------------------------
   attr = n: v: { ${n} = v; };
   singletonAttr = n: v: singleton <| attr n v;
@@ -60,7 +61,7 @@ in
   # --- lists -----------------------------------------------------------------
   listPairs = listMap pair;
   listMap = f: set: valuesOf <| mapValues f set;
-  listOnly = ns: set: map (n: set.${n}) ns;
+  listOf = ns: set: map (n: set.${n}) ns;
 
   # --- updaters --------------------------------------------------------------
   pointwisel =
@@ -75,12 +76,8 @@ in
     base
     // mapValues (n: v: if isSet v && isSet (base.${n} or null) then base.${n} // v else v) override;
 
-  # --- set -> list -----------------------------------------------------------
-
-  # idk
-  mergeMap = f: set: namesOf set |> map (n: f n set.${n}) |> mergeAttrs;
-  bindSets = f: set: concatMap (n: f n set.${n}) <| namesOf set;
-  mbindSets = f: set: assocPairs <| bindSets f set;
+  # --- getters ---------------------------------------------------------------
+  pick = ns: set: assocNames (n: set.${n}) ns;
 
   # --- intersections ---------------------------------------------------------
   intersectWith =
@@ -92,9 +89,15 @@ in
     wrong = bindSets (n: v: if !pred n v then singletonPair n v else [ ]) set;
   };
 
-  # --- transforms ------------------------------------------------------------
-  transposeSet = set: groupMap (_: assocPairs) <| listMap (root: mapValues (_: pair root)) set;
 
+  # --- set -> list -----------------------------------------------------------
+
+  # idk
+  mergeMap = f: set: namesOf set |> map (n: f n set.${n}) |> mergeAttrs;
+  bindSets = f: set: concatMap (n: f n set.${n}) <| namesOf set;
+  mbindSets = f: set: assocPairs <| bindSets f set;
+  transposeSet = set: groupMap (_: assocPairs) <| listMap (root: mapValues (_: pair root)) set;
+  # --- transforms ------------------------------------------------------------
   # --- generators ------------------------------------------------------------
   genSetBy =
     adapter: roots: generator:
@@ -105,9 +108,6 @@ in
     transposeAttrs <| genSetBy adapter roots generator;
 
   genTransposedAttrs = genTransposedAttrsBy id;
-
-  # --- getters ---------------------------------------------------------------
-  pick = ns: set: assocNames (n: set.${n}) ns;
 
   # --- selections ------------------------------------------------------------
   foldPathBy =

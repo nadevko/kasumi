@@ -24,7 +24,8 @@ let
     typeOf
     ;
 in
-{
+prev.prelude or { }
+// {
   # --- combinators -----------------------------------------------------------
   id = x: x;
   const = x: _: x;

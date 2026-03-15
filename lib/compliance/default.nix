@@ -1,6 +1,6 @@
 final: prev:
 let
-  inherit (final.attrs) genAttrs pair;
+  inherit (final.sets) assocBy assocNames pair;
   inherit (final.debug) throw;
   inherit (final.filesystem) importJson;
   inherit (final.strings) joinSep;
@@ -8,74 +8,73 @@ let
   inherit (final.prelude)
     id
     isString
-    boolAnd
-    boolOr
+    land
+    lor
     typeOf
-    flip
     ;
 
   inherit (final.compliance)
-    exceptions
-    getException
-    getLicense
+    bySpdx
     getSpdx
     isSpdx
-    licenses
     licensesOrLater
     spdxCompose
     spdxComposeList
-    spdxLicenseComposer
+    spdxAnd
+    spdxOr
+    spdxWith
     ;
 in
 {
   # --- SPDX lists ------------------------------------------------------------
-  inherit (importJson ./spdx.json) spdxVersion spdxDate;
+  inherit (importJson ./by-spdx.json) bySpdx spdxVersion spdxDate;
 
-  licenses = importJson ./licenses.json;
-  exceptions = importJson ./exceptions.json;
-
-  isSpdx = x: x ? type && x.type == "spdx";
+  isSpdx = x: x ? type && (x.type == "license" || x.type == "exception");
 
   getSpdx =
-    set: selfName: x:
-    if isString x then
-      set.${x} or (throw "compliance.${selfName}: unknown spdx ${x}")
+    n:
+    if isString n then
+      bySpdx.${n} or (throw "compliance.getSpdx: unknown spdx '${n}'")
     else
-      assert isSpdx x || throw "compliance.${selfName}: spdx or id are expected but got ${typeOf x}";
-      x;
-
-  getLicense = getSpdx licenses "getLicense";
-  getException = getSpdx exceptions "getException";
+      assert isSpdx n || throw "compliance.getSpdx: spdx or name are expected but got '${typeOf n}'";
+      n;
+  
+  spdx = {
+    __findFile = _: getSpdx;
+    __mul = spdxAnd;
+    __lessThan = spdxOr;
+    __div = spdxWith;
+    # __sub = spdxPlus;
+  };
 
   # --- SPDX Combinators ------------------------------------------------------
   spdxCompose =
-    getA: getB: join: comparator: a: b:
+    join: comparator: a: b:
     let
-      a' = getA a;
-      b' = getB b;
+      a' = getSpdx a;
+      b' = getSpdx b;
     in
     {
-      type = "spdx";
-      id = join a'.id b'.id;
+      type = "license";
+      name = join a'.name b'.name;
       osiApproved = comparator a'.osiApproved b'.osiApproved;
       fsfLibre = comparator a'.fsfLibre b'.fsfLibre;
       nixFree = comparator a'.nixFree b'.nixFree;
       nixRedistributable = comparator a'.nixRedistributable b'.nixRedistributable;
     };
 
-  spdxLicenseComposer = spdxCompose getLicense getLicense;
-  spdxAnd = spdxLicenseComposer (a: b: "(${a} and ${b})") boolAnd;
-  spdxOr = spdxLicenseComposer (a: b: "(${a} or ${b})") boolOr;
-  spdxWith = spdxCompose getLicense getException (a: b: "(${a} with ${b})") boolAnd;
+  spdxAnd = spdxCompose (a: b: "(${a} and ${b})") land;
+  spdxWith = spdxCompose (a: b: "(${a} with ${b})") land;
+  spdxOr = spdxCompose (a: b: "(${a} or ${b})") lor;
 
   spdxComposeList =
     joinId: comparator: xs:
     let
-      xs' = map getLicense xs;
+      xs' = map getSpdx xs;
     in
     {
-      type = "spdx";
-      id = joinId <| pluck "id" xs';
+      type = "license";
+      name = joinId <| pluck "name" xs';
       osiApproved = comparator <| pluck "osiApproved" xs';
       fsfLibre = comparator <| pluck "fsfLibre" xs';
       nixFree = comparator <| pluck "nixFree" xs';
@@ -86,7 +85,7 @@ in
   spdxAny = spdxComposeList (xs: "(${joinSep " or " xs})") <| any id;
 
   # --- SPDX plus -------------------------------------------------------------
-  spdxPlus = x: licensesOrLater.${(getLicense x).id};
+  spdxPlus = x: licensesOrLater.${(getSpdx x).name};
 
   licensesOrLater =
     let
@@ -104,7 +103,7 @@ in
         "GFDL-1.3"
       ];
     in
-    genAttrs (id: id + "-or-later" |> getLicense |> pair id) gnu
-    // genAttrs (flip pair getLicense) (map (id: id + "-or-later") gnu)
-    // genAttrs (id: id + "-or-later" |> getLicense |> pair (id + "-only")) gnu;
+    assocNames (n: getSpdx <| n + "-or-later") gnu
+    // assocNames getSpdx (map (n: n + "-or-later") gnu)
+    // assocBy (n: n + "-or-later" |> getSpdx |> pair (n + "-only")) gnu;
 }
