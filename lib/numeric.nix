@@ -3,7 +3,6 @@ let
   inherit (final.prelude) flip;
   inherit (final.lists)
     foldl'
-    generate
     head
     size
     tail
@@ -146,7 +145,7 @@ in
   alignDown = align: x: div x align * align;
   isAligned = align: x: mod x align == 0;
 
-  # --- parity / checks -------------------------------------------------------
+  # --- checks ----------------------------------------------------------------
   isEven = x: mod x 2 == 0;
   isOdd = x: mod x 2 != 0;
 
@@ -164,17 +163,4 @@ in
   clamp =
     low: high: x:
     max low <| min x high;
-
-  # --- ranges ----------------------------------------------------------------
-  range =
-    low: high: step:
-    assert step != 0;
-    assert (step > 0 && high >= low) || (step < 0 && high <= low);
-    generate (i: low + i * step) <| floor ((high - low) / step);
-
-  arange =
-    low: high: step:
-    assert step != 0;
-    assert (step > 0 && high >= low) || (step < 0 && high <= low);
-    generate (i: low + i * step) <| floor ((high - low) / step) + 1;
 }

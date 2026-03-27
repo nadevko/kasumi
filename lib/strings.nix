@@ -134,17 +134,17 @@ in
   repeat = n: x: join <| replicate n x;
   replace = from: to: replaceAll [ from ] [ to ];
 
-  removePrefix =
+  trimPrefix =
     seg: str:
-    assert !isPath seg || throw "kasumi.strings.removePrefix: path as first argument aren't supported.";
+    assert !isPath seg || throw "kasumi.strings.trimPrefix: path as first argument aren't supported.";
     let
       len = length seg;
     in
     if slice 0 len str == seg then slice len (-1) str else str;
 
-  removeSuffix =
+  trimSuffix =
     seg: str:
-    assert !isPath seg || throw "kasumi.strings.removeSuffix: path as first argument aren't supported.";
+    assert !isPath seg || throw "kasumi.strings.trimSuffix: path as first argument aren't supported.";
     let
       len = length seg;
       segLen = length seg;
@@ -158,14 +158,14 @@ in
     in
     optionalStr (str != null) (head str);
 
-  trimL =
+  triml =
     x:
     let
       str = match "[[:space:]]*(.*)" x;
     in
     optionalStr (str != null) (head str);
 
-  trimR =
+  trimr =
     x:
     let
       str = match "(.*[^[:space:]])[[:space:]]*" x;

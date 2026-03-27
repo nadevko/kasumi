@@ -64,10 +64,10 @@ let
     at = i: xs: prev.elemAt xs i;
     concatAll = prev.concatLists;
     contains = xs: x: prev.elem x xs;
+    countOf = prev.length;
     generate = prev.genList;
     headOf = prev.head;
     pluck = prev.catAttrs;
-    sizeOf = prev.length;
     sortBy = prev.sort;
     tailOf = prev.tail;
     where = prev.filter;

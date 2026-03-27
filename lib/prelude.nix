@@ -54,6 +54,15 @@ prev.prelude or { }
     no: yes: cond:
     if cond then yes else no;
 
+  compare =
+    a: b:
+    if a == b then
+      0
+    else if a < b then
+      -1
+    else
+      1;
+
   # --- fixpoints -------------------------------------------------------------
   fixAs =
     name: rset:
